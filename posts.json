@@ -1,0 +1,56 @@
+[
+  {
+    "slug": "2026-08-23-sde-and-diffusion",
+    "title": "Interactive Stochastic Differential Equations",
+    "date": "2026-08-23",
+    "summary": "Random walks and Brownian motion, stochastic processes and the Markov property, Itô calculus and SDEs, and finally the Fokker–Planck equation and the probability flow ODE that underpins diffusion models.",
+    "url": "./posts/2026-08-23-sde-and-diffusion/index.html",
+    "readingMinutes": 41,
+    "author": "Seungheon Doh"
+  },
+  {
+    "slug": "2026-08-16-ode-and-pde",
+    "title": "Interactive Differential Equations",
+    "date": "2026-08-16",
+    "summary": "ODEs and their numerical solvers — direction fields, initial value problems, phase portraits, Euler and Runge–Kutta, and numerical stability — then PDEs: the transport, continuity and diffusion equations.",
+    "url": "./posts/2026-08-16-ode-and-pde/index.html",
+    "readingMinutes": 33,
+    "author": "Seungheon Doh"
+  },
+  {
+    "slug": "2026-08-08-interactive-calculus",
+    "title": "Interactive Calculus",
+    "date": "2026-08-08",
+    "summary": "Functions, limits, derivatives and the chain rule, Taylor expansion and integrals, then partial derivatives, the gradient, Jacobian, Hessian, vector fields, divergence and the Laplacian.",
+    "url": "./posts/2026-08-08-interactive-calculus/index.html",
+    "readingMinutes": 35,
+    "author": "Seungheon Doh"
+  },
+  {
+    "slug": "2026-07-30-information-theory",
+    "title": "Interactive Information Theory",
+    "date": "2026-07-30",
+    "summary": "Self-information, entropy and coding length, cross-entropy and KL divergence, mutual information, and the losses built on them — cross-entropy, perplexity, the ELBO, and InfoNCE.",
+    "url": "./posts/2026-07-30-information-theory/index.html",
+    "readingMinutes": 35,
+    "author": "Seungheon Doh"
+  },
+  {
+    "slug": "2026-07-23-interactive-probability",
+    "title": "Interactive Probability",
+    "date": "2026-07-23",
+    "summary": "Random variables, joint and conditional distributions, expectation, the distributions machine learning actually uses, and the road from likelihood to NLL, Bayes' rule, and MAP.",
+    "url": "./posts/2026-07-23-interactive-probability/index.html",
+    "readingMinutes": 52,
+    "author": "Seungheon Doh"
+  },
+  {
+    "slug": "2026-07-14-linear-algebra",
+    "title": "Interactive Linear Algebra",
+    "date": "2026-07-14",
+    "summary": "Vectors, inner products, eigenvalues, the four fundamental subspaces, change of basis, and PyTorch einsum/permute/view/reshape.",
+    "url": "./posts/2026-07-14-linear-algebra/index.html",
+    "readingMinutes": 26,
+    "author": "Seungheon Doh"
+  }
+]

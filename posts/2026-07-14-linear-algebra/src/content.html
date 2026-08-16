@@ -1,0 +1,671 @@
+    <div class="la-hero" id="intro">
+      <a class="language-link" href="./index.html" lang="en">English ver.</a>
+      <h1>Basic Definition of linear algebra</h1>
+      <p class="la-meta"><time datetime="2026-07-14">2026.07.14</time></p>
+      <p class="la-footnote">참고: <a href="https://angeloyeo.github.io/" target="_blank" rel="noopener noreferrer">angeloyeo.github.io</a>의 선형대수 시리즈, 그리고 더 formal한 정의가 필요하면 <a href="https://www.deeplearningbook.org/contents/linear_algebra.html" target="_blank" rel="noopener noreferrer">Goodfellow, Bengio &amp; Courville, <em>Deep Learning</em> — Chapter 2: Linear Algebra</a>를 함께 참고했습니다.</p>
+      <!-- intro:start -->
+      <p class="la-sub">
+        머신러닝 연구에서 데이터는 대개 벡터와 행렬의 형태로 표현됩니다. 언어 모델은 단어와 문장을 고차원 벡터로 변환하고, 이미지 모델은 픽셀과 시각적 특징을 텐서로 구성합니다. 이처럼 데이터에 수치적 좌표를 부여하는 <strong>표현학습</strong>은 모델이 의미와 패턴을 다룰 수 있게 만드는 출발점입니다.
+      </p>
+      <p class="la-sub">
+        표현된 벡터를 비교하고 변환하는 과정에도 선형대수가 사용됩니다. 검색 시스템은 내적과 코사인 유사도로 질의에 가까운 문서나 이미지를 찾고, 어텐션은 query와 key의 행렬곱으로 어떤 정보에 집중할지 결정합니다. PCA와 SVD는 고차원 데이터의 주요 구조를 추출하며, 신경망의 각 층은 행렬곱을 통해 입력 표현을 새로운 공간으로 이동시킵니다. 생성 모델 역시 잠재공간의 벡터를 점진적으로 변환하여 텍스트, 이미지, 오디오와 같은 새로운 표본을 구성합니다.
+      </p>
+      <p class="la-sub">
+        그렇다면 <strong>선형대수</strong>란 무엇이며, 왜 “선형”이라는 이름이 붙었을까요? 선형대수는 벡터공간과 그 사이의 선형변환, 그리고 이를 표현하는 행렬과 연립일차방정식을 연구하는 수학 분야입니다. 여기서 “선형”이란 어떤 함수 \(f\)가 다음 두 조건을 <em>모두</em> 만족한다는 뜻입니다.
+      </p>
+      <ul class="la-axioms">
+        <li><strong>가산성 (Additivity)</strong> <span class="la-axiom-eq">\(f(x+y)=f(x)+f(y)\)</span> <span class="la-axiom-note">각각 변환해서 더하나, 더해서 변환하나 결과가 같다.</span></li>
+        <li><strong>동차성 (Homogeneity)</strong> <span class="la-axiom-eq">\(f(cx)=c\,f(x)\)</span> <span class="la-axiom-note">입력을 \(c\)배 늘리면 결과도 정확히 \(c\)배 늘어난다.</span></li>
+      </ul>
+      <p class="la-sub">
+        두 조건은 함께 “분해해서 따로 계산한 뒤 다시 합쳐도 된다”는 보장을 줍니다. 그래서 복잡한 벡터도 기저벡터들의 조합으로 쪼개어 체계적으로 분석할 수 있고, 변환 전체를 기저벡터의 상(image)만으로 완전히 기술할 수 있습니다. 이것이 곧 <strong>행렬</strong>입니다. “대수”는 이러한 구조와 연산을 기호와 방정식으로 다룬다는 의미입니다.
+      </p>
+      <p class="la-sub">
+        예를 들어 미분과 적분은 이 두 조건을 만족합니다: \((af+bg)'=af'+bg'\)이고 \(\int(af+bg)=a\int f+b\int g\)입니다. 그래서 다항식처럼 기저를 잡을 수 있는 함수공간에서는 미분이라는 연산조차 <em>행렬 하나</em>로 표현하고 계산할 수 있습니다. 반대로 \(y=mx+n\) (\(n\neq 0\))은 그래프가 직선인데도 선형이 아닙니다. \(f(x+y)=m(x+y)+n\)이지만 \(f(x)+f(y)=m(x+y)+2n\)이라 가산성이 깨지고, \(f(cx)=cmx+n\)이지만 \(c\,f(x)=cmx+cn\)이라 동차성도 깨집니다. 두 조건은 \(c=0\)을 넣으면 \(f(0)=0\)을 강제하므로, <strong>원점을 지나지 않는 함수는 선형일 수 없습니다.</strong> 이런 함수는 선형이 아니라 <strong>아핀(affine)</strong>이라 부르며, 신경망의 bias 항이 하는 일이 정확히 이 평행이동입니다.
+      </p>
+      <p class="la-sub">
+        따라서 선형대수를 이해한다는 것은 공식을 암기하는 데 그치지 않고, 모델이 정보를 <strong>표현하고, 비교하고, 압축하고, 생성하는 방식</strong>을 이해하는 일에 가깝습니다. 이 글은 벡터에서 시작해 내적, 기저, 선형변환, 고유값과 부분공간으로 이어지는 핵심 개념을 정의, 기하적 직관, 대수적 표현의 순서로 설명합니다. 수식의 변화가 공간의 변화와 어떻게 대응하는지를 함께 확인합니다.
+      </p>
+      <!-- intro:end -->
+    </div>
+
+    <div class="la-layout">
+      <nav class="la-index" aria-label="이 글의 주제">
+        <p class="la-index-title">Index</p>
+        <a href="#intro">Basic Definition of linear algebra</a>
+        <a href="#vector">벡터</a>
+        <a href="#operations">연산의 의미</a>
+        <a href="#norm">노름</a>
+        <a href="#dot">내적</a>
+        <a href="#cross">외적</a>
+        <a href="#combination">선형결합</a>
+        <a href="#independence">독립·생성·기저</a>
+        <a href="#function">선형함수</a>
+        <a href="#transform">선형변환</a>
+        <a href="#multiply">행렬 곱셈</a>
+        <a href="#inverse">역행렬</a>
+        <a href="#eigen">고유값·고유벡터</a>
+        <a href="#subspaces">4대 부분공간</a>
+        <a href="#projection">직교·정사영</a>
+        <a href="#invariance">불변성과 가변성</a>
+        <a href="#basis">기저 변환</a>
+        <a href="#pytorch">PyTorch</a>
+      </nav>
+
+      <div class="la-content">
+    <!-- 1. 벡터란 무엇인가 -->
+    <section id="vector" class="topic">
+      <h2>벡터란 무엇인가 <span class="en">What is a Vector</span></h2>
+      <p class="topic-lead">벡터는 선형대수를 구성하는 가장 기본적인 대상이다. 단순히 여러 수를 배열한 것으로 보일 수 있지만, 위치와 속도 같은 물리량은 물론 이미지와 문장의 임베딩까지 다양한 대상을 일관된 형식으로 표현한다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 벡터는 벡터공간의 원소다. 이 글에서는 먼저 실수 n개를 순서대로 나열한 \(v = (v_1, v_2, \ldots, v_n)\in\mathbb{R}^n\)을 다룬다. 2차원과 3차원에서는 이를 크기와 방향을 가진 화살표로 시각화할 수 있다.</p>
+          <p class="interp"><strong>기하적으로.</strong> 원점에서 출발해 한 점까지 뻗은 화살표라고 생각하면 된다. 화살표의 길이가 크기이고, 화살표가 가리키는 쪽이 방향이다. \(v=(3,1)\)은 오른쪽으로 3, 위로 1만큼 간 지점을 가리키는 화살표다.</p>
+          <p class="interp"><strong>대수적으로.</strong> \(\mathbb{R}^n\)의 벡터는 n개의 실수를 순서 있게 배열한 것이다. 크기는 피타고라스 정리를 일반화한 노름 \(\|v\|=\sqrt{v_1^2+\cdots+v_n^2}\)으로 계산한다. 이러한 정의는 기하적으로 시각화하기 어려운 4차원 이상의 벡터에도 동일하게 적용된다.</p>
+          <p class="formula">\[\begin{aligned} v &= (v_1, v_2, \ldots, v_n) \in \mathbb{R}^n \\ \|v\| &= \sqrt{v_1^2+v_2^2+\cdots+v_n^2} \end{aligned}\]</p>
+          <p class="interp"><strong>또 다른 표현: 극좌표.</strong> 2차원 벡터는 (x,y) 대신 크기 \(r=\|v\|\)와 x축으로부터의 방향각 θ만으로도 똑같이 표현할 수 있다: \(v=(r\cos\theta, r\sin\theta)\). 같은 화살표를 직교좌표로 쓰든 극좌표로 쓰든 가리키는 대상은 하나다 — "표현은 달라도 실체는 같다"는 주제의 가장 단순한 예다. 오른쪽 아래 단위원 그림이 cosθ·sinθ·tanθ를 직접 보여준다.</p>
+          <p class="interp"><strong>sin·cos·tan의 선형대수적 의미.</strong> 삼각함수는 각도 계산을 넘어 서로 다른 표현을 연결한다. cosθ는 두 벡터가 정렬된 정도를 나타내고(내적: \(\cos\theta=\frac{a\cdot b}{\|a\|\|b\|}\)), sinθ는 두 벡터가 생성하는 평행사변형의 넓이 비율을 나타낸다(외적: \(\|a\times b\|=\|a\|\|b\|\sin\theta\)). \(\tan\theta=\sin\theta/\cos\theta=y/x\)는 방향의 기울기이며, 역으로 \(\theta=\operatorname{atan2}(y,x)\)를 통해 좌표 (x,y)에서 방향각을 구할 수 있다.</p>
+          <p class="formula">\[\begin{aligned} x &= r\cos\theta \\ y &= r\sin\theta \\ r &= \|v\| \\ \theta &= \operatorname{atan2}(y,x) \end{aligned}\]</p>
+          <p class="hint">아래 화살표를 드래그해보세요. r(반지름)과 θ(각도 호)가 함께 표시됩니다. 좌표계를 바꿔도 화살표(벡터 자체)는 그대로라는 점은 "불변성과 가변성"에서 다시 다룹니다. 이 벡터 v=(3,1)은 "기저 변환"에서 다시 등장합니다.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-vector" width="640" height="440"></canvas>
+          <p class="readout" id="r-vector">v = (3.00, 1.00) &nbsp;·&nbsp; ‖v‖ = 3.16 &nbsp;·&nbsp; θ = 18.4°</p>
+          <p class="tensor-label">같은 θ를 단위원에서 본 cosθ · sinθ · tanθ</p>
+          <canvas id="c-vector-trig" width="640" height="260"></canvas>
+          <p class="readout" id="r-vector-trig">cosθ = 0.949 &nbsp;·&nbsp; sinθ = 0.316 &nbsp;·&nbsp; tanθ = 0.333</p>
+        </div>
+      </div>
+      <details class="snippet-box">
+        <summary>Python 코드로 보기</summary>
+        <pre class="snippet"><code>import numpy as np
+
+v = np.array([3, 1])
+print("magnitude:", np.linalg.norm(v))
+print("angle(deg):", np.degrees(np.arctan2(v[1], v[0])))</code></pre>
+      </details>
+    </section>
+
+    <!-- 2. 벡터 연산의 의미 -->
+    <section id="operations" class="topic">
+      <h2>벡터 연산의 의미 <span class="en">Meaning of Vector Operations</span></h2>
+      <p class="topic-lead">벡터의 덧셈, 뺄셈, 스칼라배는 이후의 모든 선형 연산을 구성하는 기초가 된다. 계산 규칙과 기하적 변화를 함께 살펴보면 각 연산의 의미를 명확히 이해할 수 있다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 벡터 덧셈 \(v+w\)는 대응하는 성분을 더하는 연산이고, 뺄셈 \(v-w\)는 \(v+(-w)\)로 정의된다. 스칼라배 \(kv\)는 모든 성분에 스칼라 \(k\)를 곱하며, 평균 \((v+w)/2\)는 두 벡터의 합을 절반으로 줄인 것이다.</p>
+          <p class="interp"><strong>그림으로 보면.</strong> 스칼라배는 화살표의 길이를 \(k\)배로 바꾸는 연산이다. \(k\)가 양수이면 방향이 유지되고, 음수이면 반대로 전환된다. 두 벡터를 더할 때는 첫 번째 화살표의 끝에 두 번째 화살표의 시작점을 배치한다. 원점에서 마지막 끝점을 잇는 화살표가 \(v+w\)이며, 두 벡터가 이루는 평행사변형의 대각선과 일치한다. 반면 \(v-w\)는 \(w\)의 끝점에서 \(v\)의 끝점으로 향하는 화살표다. 따라서 두 점 사이의 거리는 \(\|v-w\|\)로 측정할 수 있다. 또한 \((v+w)/2\)는 \(v\)와 \(w\)의 끝점을 잇는 선분의 중점이다.</p>
+          <p class="interp"><strong>대수적으로.</strong> 각 연산은 대응하는 성분별로 수행된다: \(v+w=(v_1+w_1,\ldots,v_n+w_n)\), \(v-w=(v_1-w_1,\ldots,v_n-w_n)\), \(kv=(kv_1,\ldots,kv_n)\). \(c_1v+c_2w\) 형태의 식은 이후에 다룰 선형결합으로 확장된다. n개 벡터의 평균 \((v_1+\cdots+v_n)/n\)은 여러 점의 무게중심이며, 여러 임베딩의 대표값을 계산할 때도 활용된다.</p>
+          <p class="formula">\[\begin{aligned} v + w &= (v_1+w_1, \ldots, v_n+w_n) \\ v - w &= (v_1-w_1, \ldots, v_n-w_n) \\ kv &= (kv_1, \ldots, kv_n) \\ \text{avg} &= \frac{v+w}{2} \end{aligned}\]</p>
+          <p class="hint">v, w를 드래그하고 k 슬라이더를 움직여보세요. v-w(점선)와 평균 M(중점)도 함께 표시됩니다.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-ops" width="640" height="440"></canvas>
+          <div class="controls">
+            <label>k = <span id="ops-k-val">1.0</span> <input id="ops-k" type="range" min="-2" max="2" step="0.1" value="1"></label>
+          </div>
+          <p class="readout" id="r-ops">v+w = (4.00, 3.00) &nbsp;·&nbsp; kv = (3.00, 1.00)</p>
+        </div>
+      </div>
+      <details class="snippet-box">
+        <summary>Python 코드로 보기</summary>
+        <pre class="snippet"><code>import numpy as np
+
+v, w = np.array([3, 1]), np.array([1, 2])
+print(v + w)   # 화살표를 이어 붙이는 덧셈
+print(2 * v)   # 스칼라배</code></pre>
+      </details>
+    </section>
+
+    <!-- 3. 노름 -->
+    <section id="norm" class="topic">
+      <h2>노름 <span class="en">Norm</span></h2>
+      <p class="topic-lead">노름은 벡터의 크기를 하나의 스칼라로 요약한다. 그러나 크기를 측정하는 방식은 유일하지 않으며, 선택한 노름에 따라 공간의 기하적 형태와 최적화 문제의 성질이 달라진다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 벡터 v의 노름 \(\|v\|\)는 벡터의 "크기(길이)"를 하나의 음이 아닌 실수로 재는 함수다. 가장 흔히 쓰는 것은 유클리드 노름(L2 노름) \(\|v\|_2 = \sqrt{v_1^2+\cdots+v_n^2}\)이지만, 크기를 재는 방법은 이것 하나만 있는 게 아니다.</p>
+          <p class="interp"><strong>기하적으로.</strong> 노름이 1인 점들의 집합인 단위구면, 즉 단위구의 경계를 비교하면 각 노름의 차이가 명확하게 드러난다. 2차원에서 L2 단위구면은 원, L1 단위구면은 마름모, L∞ 단위구면은 정사각형이다. 단위구 자체는 각각 그 경계를 포함한 내부 \(\{v:\|v\|\leq1\}\)를 뜻한다.</p>
+          <p class="interp"><strong>대수적으로.</strong> 노름은 ① \(\|v\|\geq0\)이고 v=0일 때만 0(양수성), ② \(\|kv\|=|k|\|v\|\)(스칼라배와 호환), ③ \(\|v+w\|\leq\|v\|+\|w\|\)(삼각부등식)을 만족하는 함수로 정의된다. L2 노름은 내적과 \(\|v\|_2=\sqrt{v\cdot v}\)로 직접 연결된다 — 바로 다음 "내적" 섹션의 출발점이다.</p>
+          <p class="interp"><strong>실전에서: 임베딩 정규화.</strong> 노름이 정확히 1인 벡터를 단위벡터라 부른다. 영벡터가 아닌 v를 자신의 노름으로 나누면(\(\hat{v} = v/\|v\|\)) 같은 방향의 단위벡터가 되는데, 이를 정규화라 한다. 정규화된 두 임베딩의 내적 \(\hat{v}\cdot\hat{w} = (v\cdot w)/(\|v\|\|w\|) = \cos\theta\)는 코사인 유사도와 같다. CLIP과 SimCLR 같은 대조학습 모델은 목적함수에서 방향의 유사성을 비교하고 벡터 크기가 점수에 임의로 개입하지 않도록 이 성질을 활용한다.</p>
+          <p class="interp"><strong>내적으로 유사도를 재는 이유, 그리고 고차원에서의 의미.</strong> 임베딩은 보통 수백~수천 차원이지만 크기 \(\|v\|=\sqrt{\sum_i v_i^2}\)와 정규화된 방향 \(v/\|v\|\)은 2차원과 같은 방식으로 정의된다. 내적 \(\sum_i a_ib_i\)은 두 표현의 대응 성분이 함께 정렬되는 정도를 합산한다. 실제 신경망에서는 하나의 차원이 하나의 의미를 담당한다고 보기보다 여러 차원에 특징이 분산되어 있다고 보는 편이 정확하다. 또한 고차원 등방성 분포에서 무작위 벡터의 코사인 값은 0 부근에 집중하지만, 실제 임베딩은 비등방적일 수 있으므로 코사인 값의 의미는 모델과 데이터의 기준 분포를 함께 고려해야 한다.</p>
+          <p class="interp"><strong>실전에서: 확률분포의 정규화는 왜 L1인가.</strong> 확률분포 \(p=(p_1,\ldots,p_n)\)는 \(p_i\geq0\)이고 합이 1이어야 한다(\(\sum_i p_i=1\)). 성분이 모두 음이 아니므로 이 "합이 1" 조건은 사실 \(\|p\|_1=\sum_i|p_i|=1\)과 정확히 같은 말이다 — 즉 확률분포의 정규화는 L2가 아니라 L1 노름을 1로 만드는 것이다. 임의의 양수 벡터 x는 x를 \(\|x\|_1\)로 나누면(\(p=x/\|x\|_1\)) 확률분포가 된다. 신경망의 소프트맥스가 하는 일이 정확히 이것이다 — exp로 모든 성분을 양수로 만든 뒤, 그 합(L1 노름)으로 나눠 "총합 1"이라는 확률 조건을 맞춘다.</p>
+          <p class="formula">\[\begin{aligned} \|v\|_1 &= |v_1|+\cdots+|v_n| \\ \|v\|_2 &= \sqrt{v_1^2+\cdots+v_n^2} = \sqrt{v\cdot v} \\ \|v\|_\infty &= \max(|v_1|,\ldots,|v_n|) \\ \hat{v} &= v/\|v\| \end{aligned}\]</p>
+          <p class="hint">v를 드래그해보세요. 세 노름의 값이 함께 갱신되고, 배경의 원·마름모·정사각형은 각 노름의 단위구면(노름=1인 점들의 자취)입니다.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-norm" width="640" height="440"></canvas>
+          <p class="readout" id="r-norm">v = (3.00, 2.00) &nbsp;·&nbsp; ‖v‖₁ = 5.00 &nbsp;·&nbsp; ‖v‖₂ = 3.61 &nbsp;·&nbsp; ‖v‖∞ = 3.00</p>
+
+          <p class="tensor-label">임베딩 정규화(L2): 크기 제각각인 벡터들 → 전부 단위원 위(방향만 남음)</p>
+          <canvas id="c-norm-embed" width="640" height="260"></canvas>
+          <div class="controls">
+            <label>t = <span id="embed-t-val">0.00</span> <input id="embed-t" type="range" min="0" max="1" step="0.01" value="0"></label>
+            <button type="button" id="embed-play">정규화 재생</button>
+          </div>
+          <p class="readout" id="r-norm-embed">t=0: 정규화 전 (크기 제각각) &nbsp;·&nbsp; t=1: 정규화 후 (전부 단위원 위)</p>
+
+          <p class="tensor-label">확률분포 정규화(L1): 원시 양수 점수 → 합이 1인 분포(대각선 위)</p>
+          <canvas id="c-norm-prob" width="640" height="260"></canvas>
+          <div class="controls">
+            <label>t = <span id="prob-t-val">0.00</span> <input id="prob-t" type="range" min="0" max="1" step="0.01" value="0"></label>
+            <button type="button" id="prob-play">정규화 재생</button>
+          </div>
+          <p class="readout" id="r-norm-prob">t=0: 원시 점수 (합 제각각) &nbsp;·&nbsp; t=1: 확률분포 (합 = 1)</p>
+        </div>
+      </div>
+      <details class="snippet-box">
+        <summary>Python 코드로 보기</summary>
+        <pre class="snippet"><code>import numpy as np
+
+v = np.array([3, 2])
+print(np.linalg.norm(v, 1))     # L1: 5.0
+print(np.linalg.norm(v, 2))     # L2(기본값): 3.6056
+print(np.linalg.norm(v, np.inf))  # L∞: 3.0</code></pre>
+      </details>
+    </section>
+
+    <!-- 4. 내적 -->
+    <section id="dot" class="topic">
+      <h2>내적 <span class="en">Dot / Inner Product</span></h2>
+      <p class="topic-lead">내적은 두 벡터가 정렬된 정도를 하나의 스칼라로 나타낸다. 이 성질은 각도와 정사영을 정의하는 기반이 되며, 추천 시스템과 임베딩 검색의 유사도 계산에도 활용된다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 두 벡터 \(r\), \(v\)의 내적 \(r\cdot v\)는 대응하는 성분을 곱한 뒤 모두 더하여 얻는 스칼라다.</p>
+          <p class="interp"><strong>기하적으로.</strong> \(r\cdot v = \|r\|\|v\|\cos\theta\). v를 r 방향으로 수직으로 눌러서 생기는 그림자의 길이(정사영, projection)에 \(\|r\|\)을 곱한 값과 같다. 두 벡터가 이루는 각 θ가 좁을수록 내적이 크고, 정확히 수직(90°)이면 0, 90°보다 크면 음수가 된다.</p>
+          <p class="interp"><strong>대수적으로.</strong> 대응하는 성분을 곱한 뒤 그 결과를 합산한다. 즉 \(r=(r_1,r_2)\), \(v=(v_1,v_2)\)이면 \(r\cdot v=r_1v_1+r_2v_2\)다. 고정된 행벡터 r에 대해 이 연산을 v를 입력받아 스칼라를 반환하는 함수로 해석하면, 선형함수의 구체적인 예가 된다.</p>
+          <p class="interp"><strong>왜 이 둘이 같은 값인가.</strong> "성분을 곱해 더한다"는 계산과 "\(\|r\|\|v\|\cos\theta\)"라는 기하는 겉보기에 아무 상관이 없어 보인다. 둘을 잇는 다리는 <em>성분별 곱셈이 곧 방향별 합의</em>라는 사실이다. \(v\)를 \(v_1\hat{\imath}+v_2\hat{\jmath}\)로 쪼개면, 선형성에 의해 \(r\cdot v = v_1(r\cdot\hat{\imath})+v_2(r\cdot\hat{\jmath}) = v_1r_1+v_2r_2\)가 된다 — 즉 성분 공식은 "각 축 방향으로 따로 재서 더한 것"이다. 한편 \(r\cdot\hat{u}\)는 \(\hat{u}\)가 단위벡터일 때 정확히 \(r\)이 그 방향에 드리우는 그림자의 길이다. 그러니 두 식은 같은 양을 서로 다른 기저로 잰 것일 뿐이고, 그림자의 길이는 좌표축을 어떻게 돌려놓든 변하지 않는다.</p>
+          <p class="interp"><strong>직관: 정렬 점수.</strong> 내적을 "두 벡터가 얼마나 같은 방향을 보는가"에 각자의 크기를 곱한 점수로 읽으면 부호가 자연스러워진다. 같은 쪽을 보면 양수, 무관하면(수직) 0, 반대쪽을 보면 음수다. 성분 공식으로도 같은 이야기가 보인다 — \(r_iv_i\)는 \(i\)번째 축에서 두 벡터의 부호가 일치할 때만 양수를 보태므로, 총합은 "축마다 의견이 얼마나 일치하는지"를 투표해 합산한 값이다. 임베딩 검색이 내적으로 유사도를 재는 것은 이 투표를 수백 차원에서 한 번에 하는 일이다.</p>
+          <p class="formula">\[\begin{aligned} r\cdot v &= r_1v_1+r_2v_2 = \|r\|\|v\|\cos\theta \\ \text{proj length} &= \frac{r\cdot v}{\|r\|} \end{aligned}\]</p>
+          <p class="hint">r, v를 드래그하면 v에서 r 방향으로 내린 수선의 발(정사영)이 함께 그려집니다.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-dot" width="640" height="440"></canvas>
+          <p class="readout" id="r-dot">r·v = 7.00 &nbsp;·&nbsp; cosθ = 0.99 &nbsp;·&nbsp; proj 길이 = 3.13</p>
+        </div>
+      </div>
+      <details class="snippet-box">
+        <summary>Python 코드로 보기</summary>
+        <pre class="snippet"><code>import numpy as np
+
+r, v = np.array([2, 1]), np.array([3, 1])
+dot = np.dot(r, v)
+proj_len = dot / np.linalg.norm(r)   # r 방향으로의 정사영 길이
+print(dot, proj_len)</code></pre>
+      </details>
+    </section>
+
+    <!-- 5. 외적 -->
+    <section id="cross" class="topic">
+      <h2>외적 <span class="en">Cross Product</span></h2>
+      <p class="topic-lead">내적이 스칼라를 반환하는 것과 달리, 3차원 외적은 새로운 벡터를 반환한다. 이 벡터는 두 입력 벡터가 생성하는 평면에 수직이며, 그 크기는 두 벡터가 이루는 평행사변형의 넓이와 같다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 이 글에서 다루는 표준적인 외적은 두 3차원 벡터 a, b로부터 둘 모두에 수직인 벡터 a×b를 만드는 연산이다. 2차원에서는 외적 벡터 대신 2×2 행렬식으로 부호 있는 넓이를 표현하는 경우가 많다.</p>
+          <p class="interp"><strong>기하적으로.</strong> \(a\times b\)는 a, b가 만드는 평면에 수직으로 꽂힌 벡터다. 크기는 a, b가 이루는 평행사변형의 넓이 \(\|a\|\|b\|\sin\theta\)와 같고, 방향(평면의 두 수직 방향 중 어느 쪽인가)은 아래 대수적 공식이 정확하게 정해준다 — a와 b의 순서를 바꾸면(\(b\times a\)) 방향이 반대로 뒤집힌다.</p>
+          <p class="interp"><strong>대수적으로.</strong> 성분 공식 \(a\times b=(a_2b_3-a_3b_2,\ a_3b_1-a_1b_3,\ a_1b_2-a_2b_1)\)으로 계산한다. 만약 a, b가 z=0 평면 위에 있다면, \(a\times b\)의 z성분은 2×2 행렬식 \(a_1b_2-a_2b_1\)과 정확히 같다 — "역행렬"에서 다루는 행렬식과 같은 계산이다.</p>
+          <p class="formula">\[a\times b = (a_2b_3-a_3b_2, \ a_3b_1-a_1b_3, \ a_1b_2-a_2b_1)\]</p>
+          <p class="hint">아래 xy평면 캔버스에서 a(파란 화살표), b(주황 화살표)를 드래그해보세요. 오른쪽 3D 그림의 <strong>초록 화살표가 a×b</strong>입니다 — a와 b가 만드는 주황색 평행사변형에 수직으로 꽂힌, 크기는 그 넓이와 같은 벡터입니다.</p>
+        </div>
+        <div class="topic-demo topic-demo-dual">
+          <canvas id="c-cross2d" width="320" height="360"></canvas>
+          <canvas id="c-cross3d" width="320" height="360"></canvas>
+          <p class="readout" id="r-cross">a×b = (0.00, 0.00, 6.00) &nbsp;·&nbsp; 넓이 = 6.00</p>
+        </div>
+      </div>
+      <details class="snippet-box">
+        <summary>Python 코드로 보기</summary>
+        <pre class="snippet"><code>import numpy as np
+
+a, b = np.array([3, 0, 0]), np.array([1, 2, 0])
+c = np.cross(a, b)
+print(c, np.linalg.norm(c))   # [0 0 6]  6.0  (평행사변형 넓이)</code></pre>
+      </details>
+    </section>
+
+    <!-- 6. 선형결합 -->
+    <section id="combination" class="topic">
+      <h2>선형결합 <span class="en">Linear Combination</span></h2>
+      <p class="topic-lead">선형결합은 주어진 벡터들에 각각 스칼라 계수를 곱한 뒤 합산하는 연산이다. 이를 통해 주어진 벡터들이 공간의 어느 범위까지 표현할 수 있는지 분석할 수 있다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 벡터들에 각각 스칼라 계수를 곱한 뒤 모두 더한 \(c_1v_1+c_2v_2+\cdots\) 형태의 식을 선형결합이라 부른다.</p>
+          <p class="interp"><strong>기하적으로.</strong> 앞서 본 "화살표 이어붙이기"를 여러 방향, 여러 배율로 확장한 것이다. v₁ 방향으로 c₁배 간 다음, 그 지점에서 v₂ 방향으로 c₂배 이어서 가면 도착하는 최종 지점이 선형결합의 결과다.</p>
+          <p class="interp"><strong>대수적으로.</strong> 행렬-벡터 곱 \(Ax\)는 A의 열벡터들을 x의 성분을 계수로 하여 선형결합한 것과 같다: \(Ax = x_1a_1+x_2a_2\) (\(a_i\)는 \(A\)의 i번째 열). 따라서 방정식 \(Ax=b\)는 A의 열벡터들의 선형결합으로 b를 표현할 수 있는지를 묻는다.</p>
+          <p class="formula">\[Ax = x_1a_1 + x_2a_2\]</p>
+          <p class="hint">(\(a_i\) = A의 i번째 열)</p>
+          <p class="hint">슬라이더 c₁, c₂를 움직이면 c₁a₁ 뒤에 c₂a₂를 이어 붙인 결과 벡터가 실시간으로 그려집니다.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-combo" width="640" height="440"></canvas>
+          <div class="controls">
+            <label>c₁ = <span id="combo-c1-val">-1.0</span> <input id="combo-c1" type="range" min="-2" max="2" step="0.1" value="-1"></label>
+            <label>c₂ = <span id="combo-c2-val">2.0</span> <input id="combo-c2" type="range" min="-2" max="2" step="0.1" value="2"></label>
+          </div>
+          <p class="readout" id="r-combo">c₁a₁ + c₂a₂ = (3.00, 5.00)</p>
+        </div>
+      </div>
+      <details class="snippet-box">
+        <summary>Python 코드로 보기</summary>
+        <pre class="snippet"><code>import numpy as np
+
+A = np.array([[1, 2],
+              [3, 4]])          # 열벡터 a1=(1,3), a2=(2,4)
+x = np.array([-1, 2])
+print(A @ x)                    # [3 5] == -1*a1 + 2*a2</code></pre>
+      </details>
+    </section>
+
+    <!-- 7. 선형독립, 생성, 기저 -->
+    <section id="independence" class="topic">
+      <h2>선형독립, 생성, 기저 <span class="en">Linear Independence, Span & Basis</span></h2>
+      <p class="topic-lead">벡터의 개수가 증가한다고 해서 표현 가능한 공간의 차원이 항상 증가하는 것은 아니다. 중복된 방향을 구분하는 선형독립, 표현 가능한 범위를 나타내는 생성, 그리고 공간을 최소한의 벡터로 기술하는 기저는 서로 밀접하게 연결된다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의 (선형독립/선형종속).</strong> 벡터 v₁,…,vₙ에 대해 \(c_1v_1+\cdots+c_nv_n=0\)을 만족하는 방법이 모든 \(c_i=0\)인 자명한 경우 하나뿐이면 이 벡터들을 선형독립이라 한다. 어떤 \(c_i\)가 0이 아니어도 합을 0으로 만들 수 있으면 선형종속이다.</p>
+          <p class="definition"><strong>정의 (생성/Span).</strong> 벡터 v₁,…,vₙ의 생성이란 이들의 모든 선형결합으로 이루어진 집합이다: \(\text{span}\{v_1,\ldots,v_n\} = \{c_1v_1+\cdots+c_nv_n : c_i \in \mathbb{R}\}\).</p>
+          <p class="definition"><strong>정의 (기저/차원).</strong> 어떤 공간을 생성하면서 동시에 선형독립인 벡터들의 집합을 그 공간의 기저라 한다. 기저를 어떻게 고르든 그 벡터의 개수는 항상 같은데, 이 숫자를 그 공간의 차원이라 부른다.</p>
+          <p class="interp"><strong>기하적으로.</strong> 벡터 하나의 span은 원점을 지나는 직선이다. 두 벡터가 선형독립(서로 평행하지 않음)이면 그 span은 평면 전체를 덮고, 이 둘은 평면의 기저(차원 2)가 된다. 두 번째 벡터가 첫 번째와 평행해지면(선형종속) span은 다시 직선으로 쪼그라든다 — 선형종속이란 "불필요한 중복이 있어서 실질적으로 차원을 다 못 채운다"는 뜻이다.</p>
+          <p class="interp"><strong>대수적으로.</strong> n개의 벡터가 n차원에서 선형독립인지는 그들을 열로 갖는 행렬의 행렬식이 0이 아닌지로 확인한다: \(\det \neq 0 \iff\) 선형독립 \(\iff\) span이 전체 공간(차원 n) \(\iff\) 기저를 이룬다. \(\det = 0\)이면 선형종속이고, span의 차원은 n보다 낮아진다.</p>
+          <p class="formula">\[c_1v_1+\cdots+c_nv_n=0 \implies c_1=\cdots=c_n=0\] (선형독립의 정의)</p>
+          <p class="hint">v₁, v₂를 드래그해보세요. 서로 평행하지 않으면 span(음영)이 평면 전체를 덮고, 평행해지는 순간 span이 직선 하나로 쪼그라듭니다.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-independence" width="640" height="440"></canvas>
+          <p class="readout" id="r-independence">v₁=(2,1), v₂=(1,2) · det=3.00 · 선형독립 · span 차원 = 2</p>
+        </div>
+      </div>
+      <details class="snippet-box">
+        <summary>Python 코드로 보기</summary>
+        <pre class="snippet"><code>import numpy as np
+
+v1, v2 = np.array([2, 1]), np.array([1, 2])
+A = np.column_stack([v1, v2])
+det = np.linalg.det(A)
+print(det, np.linalg.matrix_rank(A))   # det != 0 -> rank 2 -> 선형독립, 기저
+
+v2_dependent = np.array([4, 2])        # v1의 배수
+A2 = np.column_stack([v1, v2_dependent])
+print(np.linalg.det(A2), np.linalg.matrix_rank(A2))  # 0, rank 1 -> 선형종속</code></pre>
+      </details>
+    </section>
+
+    <!-- 8. 선형함수 -->
+    <section id="function" class="topic">
+      <h2>선형함수 <span class="en">Linear Function</span></h2>
+      <p class="topic-lead">선형함수는 벡터의 덧셈과 스칼라배 구조를 보존하는 함수다. 이러한 보존 성질 덕분에 복잡한 입력도 기저벡터에 대한 함수값의 선형결합으로 분석할 수 있다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 함수 \(f\)가 \(f(x+y)=f(x)+f(y)\)(덧셈 보존)와 \(f(cx)=cf(x)\)(스칼라배 보존)를 동시에 만족하면 선형함수라 부른다.</p>
+          <p class="interp"><strong>기하적으로.</strong> 선형함수는 원점을 0으로 보내며 벡터의 덧셈과 스칼라배 구조를 보존한다. \(f(x)=r\cdot x\)의 값이 같은 점들은 \(r\)에 수직인 평행한 초평면을 이루고, 원점을 지나는 초평면은 \(f(x)=0\)인 영공간이다. 반대로 \(f(x)=r\cdot x+b\)처럼 상수항이 붙으면 일반적으로 \(f(0)=b\neq0\)이므로 선형이 아니라 아핀 함수다.</p>
+          <p class="interp"><strong>대수적으로.</strong> 행벡터를 이용한 \(f(v)=r\cdot v\)가 대표적인 예다. 여기서는 \(r=(2,1)\)을 사용한다. 선형성에 의해 \(f(A)+f(B)\)와 \(f(A+B)\)는 항상 일치한다.</p>
+          <p class="formula">\[f(x+y) = f(x)+f(y), \qquad f(cx) = c f(x)\]</p>
+          <p class="hint">점 \(A\), \(B\)를 드래그하면 \(f(A)+f(B)=f(A+B)\)가 성립하는지 실시간으로 확인할 수 있습니다.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-func" width="640" height="440"></canvas>
+          <p class="readout" id="r-func">f(A)=7.00, f(B)=4.00 → f(A)+f(B)=11.00 &nbsp;·&nbsp; f(A+B)=11.00 ✓</p>
+        </div>
+      </div>
+      <details class="snippet-box">
+        <summary>Python 코드로 보기</summary>
+        <pre class="snippet"><code>import numpy as np
+
+r = np.array([2, 1])
+f = lambda x: r @ x              # 선형함수
+
+A, B = np.array([3, 1]), np.array([1, 2])
+print(f(A) + f(B), f(A + B))     # 항상 같다 -> 11.0 11.0
+
+g = lambda x: r @ x + 5          # 아핀: 선형이 아님
+print(g(A) + g(B), g(A + B))     # 다르다 -> 21.0 16.0</code></pre>
+      </details>
+    </section>
+
+    <!-- 9. 선형변환 -->
+    <section id="transform" class="topic">
+      <h2>선형변환 <span class="en">Linear Transformation</span></h2>
+      <p class="topic-lead">선형변환은 공간을 확대하거나 축소하고, 회전하거나 전단하면서도 벡터공간의 선형 구조를 보존한다. 행렬은 선택한 기저에 대해 이러한 변환을 유한 개의 수로 표현한 것이다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 벡터공간 사이의 함수가 덧셈과 스칼라배를 보존하면 선형변환이라 부른다. 유한 차원에서는 입력과 출력 공간의 기저를 정한 뒤 항상 어떤 행렬 A로 T(x)=Ax처럼 표현할 수 있다.</p>
+          <p class="interp"><strong>기하적으로.</strong> 표준기저 벡터 î=(1,0), ĵ=(0,1)이 각각 어디로 이동하는지만 정하면 전체 변환이 결정된다. î는 A의 첫 번째 열로, ĵ는 두 번째 열로 이동하며, 격자 전체가 그 두 화살표를 따라 평행선을 유지한 채 늘어나거나 기울어진다.</p>
+          <p class="interp"><strong>대수적으로.</strong> 임의의 벡터 \((x,y)\)의 변환 결과는 이동한 두 기저벡터의 선형결합 \(x(A\hat{\imath})+y(A\hat{\jmath})\)으로 계산된다.</p>
+          <p class="formula">\[T(x,y) = A[x,y]^\top = x\cdot A_{:,1} + y\cdot A_{:,2}\]</p>
+          <p class="hint">a,b,c,d 슬라이더로 행렬을 바꾸면 배경 격자가 실시간으로 변형됩니다. 프리셋 버튼도 눌러보세요.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-transform" width="640" height="440"></canvas>
+          <div class="controls">
+            <label>a = <span id="tf-a-val">2.0</span> <input id="tf-a" type="range" min="-2" max="2" step="0.1" value="2"></label>
+            <label>b = <span id="tf-b-val">-3.0</span> <input id="tf-b" type="range" min="-3" max="3" step="0.1" value="-3"></label>
+            <label>c = <span id="tf-c-val">1.0</span> <input id="tf-c" type="range" min="-3" max="3" step="0.1" value="1"></label>
+            <label>d = <span id="tf-d-val">1.0</span> <input id="tf-d" type="range" min="-2" max="2" step="0.1" value="1"></label>
+            <div class="preset-row">
+              <button type="button" data-preset="rotate">회전 45°</button>
+              <button type="button" data-preset="shear">전단</button>
+              <button type="button" data-preset="scale">스케일</button>
+              <button type="button" data-preset="reflect">반사</button>
+              <button type="button" data-preset="reset">초기화</button>
+            </div>
+          </div>
+          <p class="readout" id="r-transform">A = [[2.0, -3.0], [1.0, 1.0]] &nbsp;·&nbsp; det(A) = 5.00</p>
+        </div>
+      </div>
+      <details class="snippet-box">
+        <summary>Python 코드로 보기</summary>
+        <pre class="snippet"><code>import numpy as np
+
+A = np.array([[2, -3],
+              [1,  1]])
+grid_point = np.array([1, 1])
+print(A @ grid_point)     # [-1  2]</code></pre>
+      </details>
+    </section>
+
+    <!-- 10. 행렬 곱셈 -->
+    <section id="multiply" class="topic">
+      <h2>행렬 곱셈: 두 가지 관점 <span class="en">Matrix Multiplication: Two Views</span></h2>
+      <p class="topic-lead">행렬 곱셈은 성분 계산의 규칙인 동시에 선형변환의 합성을 나타낸다. 오른쪽 행렬의 변환을 먼저 적용한 뒤 왼쪽 행렬의 변환을 적용한다는 관점에서 곱셈의 순서와 비가환성을 이해할 수 있다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="interp"><strong>먼저, 행렬이란.</strong> 행렬이란 숫자들을 m개의 행과 n개의 열을 가진 직사각형 모양의 표로 배열한 것이다 — 이를 m×n 행렬이라 부른다. i번째 행, j번째 열에 있는 숫자를 성분 Aᵢⱼ로 쓴다. 열이 하나뿐인 n×1 행렬이 바로 지금까지 다뤄온 (열)벡터다 — 벡터는 사실 행렬의 특수한 경우다.</p>
+          <p class="definition"><strong>정의.</strong> m×n 행렬 A와 n×p 행렬 B의 곱 AB는 \((AB)_{ik} = \sum_j A_{ij} B_{jk}\)로 정의되는 m×p 행렬이다. A의 열 개수와 B의 행 개수가 같아야만 곱셈이 가능하다.</p>
+          <p class="interp"><strong>기하적으로.</strong> AB는 "B를 먼저 적용한 다음 A를 적용하는" 합성 변환이다: \((AB)x = A(Bx)\). 격자에 B를 먼저 적용해 변형한 뒤, 그 결과에 다시 A를 적용하면 AB를 한 번에 적용한 것과 정확히 같은 그림이 된다 — "선형변환"의 자연스러운 확장이다.</p>
+          <p class="interp"><strong>대수적으로.</strong> AB를 계산하는 두 가지 관점이 있다. ① <em>행·열 관점</em> — (AB)의 (i,k) 성분은 A의 i번째 행과 B의 k번째 열의 내적이다. ② <em>열 조합 관점</em> — AB의 k번째 열은 "A의 열벡터들을 B의 k번째 열을 계수로 선형결합"한 것이다: \((AB)_{:,k} = A\cdot B_{:,k}\). 또한 일반적으로 <strong>AB ≠ BA</strong>다 — 곱하는 순서를 바꾸면 다른 합성 변환이 된다.</p>
+          <p class="formula">\[\begin{aligned} (AB)_{ik} &= \sum_j A_{ij} B_{jk} = \text{row}_i(A)\cdot\text{col}_k(B) \\ (AB)_{:,k} &= A \cdot B_{:,k} \end{aligned}\]</p>
+          <p class="hint">재생 버튼으로 "먼저 B, 그 위에 A" 순서로 격자가 변형되는 과정을 보세요. 버튼으로 AB와 BA를 바꿔가며 두 결과가 다르다는 것도 확인해보세요.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-multiply" width="640" height="440"></canvas>
+          <div class="controls">
+            <button type="button" id="mult-play">B → A 순서로 합성 재생</button>
+            <button type="button" id="mult-swap">AB ↔ BA 전환</button>
+          </div>
+          <p class="readout" id="r-multiply">A=[[2,-3],[1,1]], B=[[1,2],[3,4]] &nbsp;·&nbsp; AB = [[-7,-8],[4,6]]</p>
+        </div>
+      </div>
+      <details class="snippet-box">
+        <summary>Python 코드로 보기</summary>
+        <pre class="snippet"><code>import numpy as np
+
+A = np.array([[2, -3], [1, 1]])
+B = np.array([[1,  2], [3, 4]])
+print(A @ B)                     # [[-7 -8] [ 4  6]]
+print(B @ A)                     # [[ 4 -1] [10 -5]]  -> AB != BA
+
+x = np.array([1, 1])
+print(A @ (B @ x), (A @ B) @ x)  # 같다: 합성 = 곱한 행렬을 한 번에 적용</code></pre>
+      </details>
+    </section>
+
+    <!-- 11. 역행렬 -->
+    <section id="inverse" class="topic">
+      <h2>역행렬 <span class="en">Inverse Matrix</span></h2>
+      <p class="topic-lead">역행렬은 선형변환의 효과를 되돌리는 변환을 표현한다. 이러한 역변환은 원래 변환이 정보를 손실하지 않을 때에만 존재하며, 정사각행렬에서는 행렬식이 0이 아닌 조건과 동치다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 정사각행렬 \(A\)에 대해 \(AB=BA=I\)를 만족하는 행렬 \(B\)가 존재하면, \(B\)를 \(A\)의 역행렬 \(A^{-1}\)라 부른다. 여기서 \(I\)는 항등행렬이다.</p>
+          <p class="interp"><strong>기하적으로.</strong> 역변환은 A가 만든 변형을 원래 상태로 복원한다. 행렬식의 절댓값 |det(A)|는 넓이의 배율이고 부호는 방향 보존 여부를 나타내므로, 역변환의 행렬식은 \(1/\det(A)\)다. det(A)=0이면 평면이 직선 또는 한 점으로 축소되어 원래 정보가 소실되므로 역행렬이 존재하지 않는다. 이와 같은 행렬을 특이 행렬이라 한다.</p>
+          <p class="interp"><strong>대수적으로.</strong> 2×2 행렬은 공식으로 바로 구할 수 있다: \(A^{-1} = \dfrac{1}{\det(A)}\begin{bmatrix}d&-b\\-c&a\end{bmatrix}\). det(A)=0이면 이 공식이 0으로 나누는 것이 되어 정의되지 않는다.</p>
+          <p class="formula">\[\begin{aligned} A^{-1} &= \frac{1}{\det(A)}\begin{bmatrix}d&-b\\-c&a\end{bmatrix} \\ A\cdot A^{-1} &= I \end{aligned}\]</p>
+          <p class="hint">재생 버튼을 누르면 A를 적용했다가 다시 A⁻¹를 적용해 원래 격자로 돌아오는 과정을 봅니다. det 슬라이더를 0 근처로 옮기면 어떤 일이 벌어지는지 확인해보세요.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-inverse" width="640" height="440"></canvas>
+          <div class="controls">
+            <label>d = <span id="inv-d-val">1.00</span> <input id="inv-d" type="range" min="-3" max="3" step="0.05" value="1"></label>
+            <button type="button" id="inv-play">A → A⁻¹ 재생</button>
+          </div>
+          <p class="readout" id="r-inverse">A = [[2.0, -3.0], [1.0, 1.00]] &nbsp;·&nbsp; det(A) = 5.00 &nbsp;·&nbsp; A⁻¹ 존재</p>
+        </div>
+      </div>
+      <details class="snippet-box">
+        <summary>Python 코드로 보기</summary>
+        <pre class="snippet"><code>import numpy as np
+
+A = np.array([[2, -3],
+              [1,  1]])
+A_inv = np.linalg.inv(A)
+print(A_inv)                 # [[0.2 0.6] [-0.2 0.4]]
+print(np.linalg.det(A))      # 5.0, 0이면 역행렬 없음</code></pre>
+      </details>
+    </section>
+
+    <!-- 12. 고유값과 고유벡터 -->
+    <section id="eigen" class="topic">
+      <h2>고유값과 고유벡터 <span class="en">Eigenvalues & Eigenvectors</span></h2>
+      <p class="topic-lead">고유벡터는 선형변환을 적용한 뒤에도 자신이 생성하는 직선 위에 남는 벡터다. 이에 대응하는 고유값은 해당 방향에서 변환이 만드는 확대, 축소 또는 방향 반전의 비율을 나타낸다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 영벡터가 아닌 벡터 \(x\)가 \(Ax=\lambda x\)를 만족하면, \(x\)를 \(A\)의 고유벡터, 스칼라 \(\lambda\)를 그에 대응하는 고유값이라 부른다.</p>
+          <p class="interp"><strong>기하적으로.</strong> 대부분의 벡터는 선형변환을 거치면서 방향이 변하지만, 고유벡터가 생성하는 직선은 그 변환에 의해 보존된다. 고유값 λ가 양수이면 방향이 유지되고, 음수이면 반대로 전환되며, 0이면 영벡터로 축소된다.</p>
+          <p class="interp"><strong>대수적으로.</strong> \(Ax=\lambda x\)는 \((A-\lambda I)x=0\)과 같고, \(x\neq0\)인 해가 존재하려면 특성방정식 \(\det(A-\lambda I)=0\)이 성립해야 한다. 이 방정식에서 \(\lambda\)를 구한 뒤, 각 고유값에 대해 \((A-\lambda I)x=0\)을 풀어 \(x\)를 구한다.</p>
+          <p class="interp"><strong>왜 하필 행렬식이 0인가.</strong> 이 조건은 갑자기 튀어나온 것이 아니라 "역행렬" 절의 이야기를 그대로 재사용한 것이다. \((A-\lambda I)x=0\)에서 \(x=0\)은 언제나 해다 — 우리가 원하는 것은 <em>0이 아닌</em> 해가 하나라도 더 있느냐다. 그런데 어떤 행렬 \(M\)이 서로 다른 두 입력(\(0\)과 \(x\))을 같은 출력 \(0\)으로 보낸다면, \(M\)은 공간을 뭉개어 정보를 잃은 것이고 따라서 역행렬을 가질 수 없다. 역행렬이 없다는 것은 곧 \(\det M=0\)이다. 정리하면 <em>고유값이란 \(A\)에서 그 값만큼 빼면 행렬이 찌그러지는(특이해지는) 스칼라</em>이며, \(\det(A-\lambda I)=0\)은 "언제 찌그러지는가"를 \(\lambda\)에 대한 방정식으로 적은 것이다.</p>
+          <p class="interp"><strong>왜 이것이 중요한가.</strong> 고유벡터 방향에서는 행렬 곱셈이 단순한 수의 곱셈으로 바뀐다. 그래서 \(A\)를 여러 번 적용하는 일이 쉬워진다 — 고유벡터 방향의 성분은 \(A^k x=\lambda^k x\)로 \(\lambda\)의 거듭제곱만큼만 자라기 때문이다. 어떤 벡터를 고유벡터들의 합으로 쪼개두면, \(A\)를 반복 적용했을 때 \(|\lambda|\)가 가장 큰 방향이 결국 전체를 지배한다. 반복되는 선형 갱신의 장기 거동(수렴할지 발산할지, 어느 방향으로 정렬될지)이 고유값만 보면 읽히는 이유이고, PCA가 공분산행렬의 최대 고유벡터를 "데이터가 가장 크게 퍼진 방향"으로 고르는 근거이기도 하다.</p>
+          <p class="formula">\[Ax = \lambda x \iff \det(A-\lambda I) = 0\]</p>
+          <p class="hint">재생 버튼으로 원 둘레의 여러 벡터에 A를 적용해보세요. 점선(고유벡터 방향)만 방향을 유지한 채 늘어납니다. 직접 화살표를 드래그해서 "이 방향이 고유벡터인지" 실험할 수도 있습니다.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-eigen" width="640" height="440"></canvas>
+          <div class="controls">
+            <label>t = <span id="eigen-t-val">0.00</span> <input id="eigen-t" type="range" min="0" max="1" step="0.01" value="0"></label>
+            <button type="button" id="eigen-play">변환 재생</button>
+          </div>
+          <p class="readout" id="r-eigen">A = [[2,1],[1,2]] &nbsp;·&nbsp; λ₁=3, x₁=(1,1) &nbsp;·&nbsp; λ₂=1, x₂=(1,-1)</p>
+        </div>
+      </div>
+      <details class="snippet-box">
+        <summary>Python 코드로 보기</summary>
+        <pre class="snippet"><code>import numpy as np
+
+A = np.array([[2, 1],
+              [1, 2]])
+vals, vecs = np.linalg.eig(A)
+print(vals)      # [3. 1.]
+print(vecs)      # 각 열이 고유벡터: [[ 0.707 -0.707] [ 0.707  0.707]]</code></pre>
+      </details>
+    </section>
+
+    <!-- 13. 4개의 주요 부분공간 -->
+    <section id="subspaces" class="topic">
+      <h2>4개의 주요 부분공간 <span class="en">Four Fundamental Subspaces</span></h2>
+      <p class="topic-lead">행렬에는 변환에서 유지되거나 소실되는 입력 방향과 출력이 도달할 수 있는 범위가 함께 포함되어 있다. 네 개의 주요 부분공간은 이러한 구조를 입력 공간과 출력 공간의 관점에서 체계적으로 분해한다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> \(m\times n\) 행렬 \(A\)로부터 자연스럽게 정해지는 네 부분공간이 있다. 행공간은 행벡터들의 모든 선형결합, 열공간은 열벡터들의 모든 선형결합이며, 영공간은 \(\{x:Ax=0\}\), 좌영공간은 \(\{y:A^\top y=0\}\)로 정의된다.</p>
+          <p class="interp"><strong>기하적으로.</strong> A를 \(\mathbb{R}^n\to\mathbb{R}^m\) 함수로 보면, 입력공간 \(\mathbb{R}^n\)은 행공간(변환 후에도 정보가 살아남는 방향)과 영공간(변환하면 0으로 사라지는 방향)으로 정확히 수직 분해되고, 출력공간 \(\mathbb{R}^m\)은 열공간(A로 실제 도달 가능한 곳)과 좌영공간(그 나머지, 열공간과 수직)으로 수직 분해된다.</p>
+          <p class="interp"><strong>대수적으로.</strong> 아래 예제 A=[[1,2],[3,6]]는 두 번째 행이 첫 번째 행의 3배라 rank(A)=1이다. 행공간은 (1,2) 방향 직선, 그와 수직인 (2,-1) 방향이 영공간이다. 열공간은 (1,3) 방향 직선, 그와 수직인 (3,-1) 방향이 좌영공간이다.</p>
+          <p class="interp"><strong>직관: 살아남는 차원 + 사라지는 차원 = 입력 차원.</strong> 입력공간의 모든 방향은 둘 중 하나다 — 변환을 거쳐 흔적을 남기거나(행공간), 0으로 뭉개지거나(영공간). 중간은 없고 겹침도 없으므로 두 차원을 더하면 반드시 입력 차원이 된다: \(\operatorname{rank}(A)+\dim(\text{null})=n\). 이것이 rank-nullity 정리이며, "정보를 얼마나 보존하는가"와 "얼마나 버리는가"가 서로의 나머지라는 뜻이다. 위 예제에서 입력은 2차원인데 rank가 1이니 영공간이 1차원일 수밖에 없다 — 평면이 직선으로 눌리면서 정확히 한 방향이 희생된 것이다.</p>
+          <p class="interp"><strong>왜 하필 수직으로 갈라지는가.</strong> \(Ax=0\)이라는 말은 \(A\)의 <em>모든 행</em>이 \(x\)와 내적해서 0이라는 뜻이다. 즉 영공간의 벡터는 정의상 모든 행벡터에 수직이고, 따라서 행들이 만드는 공간(행공간) 전체에 수직이다. 직교라는 성질이 나중에 붙은 장식이 아니라 영공간의 정의 그 자체에서 곧바로 따라 나온다. 같은 논리를 \(A^\top\)에 적용하면 열공간⊥좌영공간이 나온다 — 같은 문장을 전치해서 한 번 더 읽은 것이다.</p>
+          <p class="formula">\[\begin{aligned} \text{row space} &\perp \text{null space} & &(\text{input}, \mathbb{R}^n)\\ \text{column space} &\perp \text{left null space} & &(\text{output}, \mathbb{R}^m) \end{aligned}\]</p>
+          <p class="hint">왼쪽 패널(입력)에서 벡터를 드래그하면 행공간·영공간 성분으로 자동 분해되고, 오른쪽 패널(출력)에서 영공간 성분은 사라지고 행공간 성분만 열공간 방향으로 살아남는 걸 봅니다.</p>
+        </div>
+        <div class="topic-demo topic-demo-dual">
+          <canvas id="c-sub-in" width="320" height="360"></canvas>
+          <canvas id="c-sub-out" width="320" height="360"></canvas>
+          <p class="readout" id="r-sub">A = [[1,2],[3,6]] (rank 1) &nbsp;·&nbsp; row=(1,2), null=(2,-1), col=(1,3), left-null=(3,-1)</p>
+        </div>
+      </div>
+      <details class="snippet-box">
+        <summary>Python 코드로 보기</summary>
+        <pre class="snippet"><code>import numpy as np
+from scipy.linalg import null_space
+
+A = np.array([[1, 2],
+              [3, 6]])
+print(np.linalg.matrix_rank(A))     # 1
+print(null_space(A).T)              # 영공간 기저
+print(null_space(A.T).T)            # 좌영공간 기저 = null(Aᵀ)</code></pre>
+      </details>
+    </section>
+
+    <!-- 14. 직교와 정사영 -->
+    <section id="projection" class="topic">
+      <h2>직교와 정사영 <span class="en">Orthogonality & Projection</span></h2>
+      <p class="topic-lead">정사영은 주어진 벡터를 특정 부분공간 안에서 가장 가까운 벡터로 근사한다. 오차가 부분공간에 직교한다는 성질은 최소제곱법과 다양한 근사 문제의 이론적 기반이 된다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의 (직교, orthogonal).</strong> 두 벡터 a, b가 \(a\cdot b=0\)이면 서로 직교한다고 하고 \(a\perp b\)로 쓴다. 여러 벡터가 쌍마다 모두 직교하면  orthogonal, 그중 전부 단위벡터면 orthonormal이라 한다.</p>
+          <p class="definition"><strong>정의 (정사영, projection).</strong> 벡터 b를 벡터 a가 만드는 직선 span{a} 위로 정사영한 점 p란, 그 직선 위의 점들 중 b와 가장 가까운 점이다 — 즉 거리 \(\|b-\lambda a\|\)를 최소로 만드는 \(\lambda\)를 찾아 \(p=\lambda^*a\)로 정한다("거리 최소화"로서의 정사영).</p>
+          <p class="definition"><strong>정의 (직교여공간, orthogonal complement).</strong> 부분공간 W의 모든 벡터와 직교하는 벡터들의 집합을 W의 직교여공간이라 하고 \(W^\perp = \{v : v\perp w \text{ for all } w\in W\}\)로 쓴다 — 앞서 본 행공간⊥영공간, 열공간⊥좌영공간이 정확히 이 관계다.</p>
+          <p class="interp"><strong>기하적으로.</strong> b에서 직선 span{a}에 수직으로 내린 그림자가 정사영 p다. b = p + e로 유일하게 나뉘는데, 오차 e = b-p는 반드시 a에 수직이다 — 수직이 아니라면 그 직선 위에 b에 더 가까운 다른 점이 있다는 뜻이라 "가장 가까운 점"이라는 정의와 모순되기 때문이다.</p>
+          <p class="interp"><strong>대수적으로.</strong> 거리의 제곱 \(\|b-\lambda a\|^2\)을 \(\lambda\)에 대해 최소화하면 \(\lambda^* = \dfrac{a\cdot b}{a\cdot a}\)를 얻는다. 이를 행렬로 쓰면 \(p = Pb\), \(P = \dfrac{aa^\top}{a^\top a}\)이고, 정사영 행렬 \(P\)는 \(P^2=P\)와 \(P^\top=P\)를 만족한다. 여러 열벡터로 이루어진 \(A\)의 열공간으로 일반화하면 \(P=A(A^\top A)^{-1}A^\top\)을 얻는다. \(Ax=b\)에 정확한 해가 없을 때, 열공간에서 \(b\)에 가장 가까운 점을 만드는 \(\hat{x}\)는 정규방정식 \(A^\top A\hat{x}=A^\top b\)를 풀어 구한다.</p>
+          <p class="formula">\[\begin{aligned} \lambda^* &= \frac{a\cdot b}{a\cdot a} \\ p &= \lambda^* a = Pb \\ P &= \frac{aa^\top}{a^\top a} \\ P^2 &= P = P^\top \end{aligned}\]</p>
+          <p class="hint">a, b를 드래그해보세요. 정사영 p(주황)와 오차 e=b-p(점선)가 항상 직각을 이루는 걸 확인할 수 있습니다.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-projection" width="640" height="440"></canvas>
+          <p class="readout" id="r-projection">a=(3,1), b=(1,3) · λ*=0.60 · p=(1.80,0.60) · e=(-0.80,2.40) · e·a=0.00</p>
+        </div>
+      </div>
+      <details class="snippet-box">
+        <summary>Python 코드로 보기</summary>
+        <pre class="snippet"><code>import numpy as np
+
+a, b = np.array([3, 1]), np.array([1, 3])
+lam = (a @ b) / (a @ a)
+p = lam * a
+e = b - p
+print(p, e, e @ a)          # p=(1.8,0.6), e=(-0.8,2.4), e.a≈0 (직교)
+
+P = np.outer(a, a) / (a @ a)   # 정사영 행렬
+print(P @ b)                   # p와 동일
+print(P @ P, P.T)              # P^2 = P, P^T = P
+
+# 최소제곱: Ax=b에 정확한 해가 없을 때
+A = np.array([[1, 0], [1, 1], [1, 2]])
+bb = np.array([1, 2, 2])
+x_hat = np.linalg.solve(A.T @ A, A.T @ bb)   # 정규방정식
+print(x_hat)</code></pre>
+      </details>
+    </section>
+
+    <!-- 15. 불변성과 가변성 -->
+    <section id="invariance" class="topic">
+      <h2>벡터의 불변성과 가변성 <span class="en">Invariance vs. Variance</span></h2>
+      <p class="topic-lead">동일한 수학적 대상도 좌표계에 따라 서로 다른 성분으로 표현된다. 반면 특정 변환이나 좌표 변경에도 유지되는 성질이 있으며, 불변성과 가변성의 구분은 대상 자체와 그 표현을 분리하는 데 필요하다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 어떤 연산(변환을 적용하거나, 좌표계를 바꾸는 것)을 거쳐도 값이 그대로면 그 연산에 대해 불변, 값이 달라지면 가변이라 한다.</p>
+          <p class="interp"><strong>기하적으로.</strong> 두 가지 다른 "불변"이 있다. (a) <em>변환에 대한 불변</em> — 고유벡터의 방향은 A를 적용해도 그대로다(다른 벡터는 방향이 꺾여 가변). (b) <em>기저에 대한 불변</em> — 벡터 자체(화살표)는 어떤 좌표계를 쓰든 그대로지만, 숫자로 쓴 성분(좌표)은 기저를 바꾸면 달라진다.</p>
+          <p class="interp"><strong>대수적으로.</strong> 고유벡터는 \(Ax=\lambda x\)를 만족하여 자신이 생성하는 직선이 보존되지만, 일반적인 벡터에서는 \(Av\)와 \(v\)의 방향이 다르다. 한편 동일한 벡터 \(v\)의 표준기저 좌표 \([v]_E\)와 새 기저 좌표 \([v]_B\)는 서로 다르지만 같은 기하적 벡터를 나타낸다.</p>
+          <p class="formula">\[\begin{aligned} \text{(a)} \quad &Ax=\lambda x \\ \text{(b)} \quad &[v]_E \neq [v]_B \end{aligned}\]</p>
+          <p class="hint">(a) 방향이 불변, (b) v는 하나지만 좌표만 다름.</p>
+          <p class="hint">토글로 두 모드를 전환해보세요.</p>
+        </div>
+        <div class="topic-demo">
+          <div class="controls">
+            <button type="button" class="toggle active" data-mode="transform">(a) 변환에 대한 불변</button>
+            <button type="button" class="toggle" data-mode="basis">(b) 기저에 대한 불변</button>
+          </div>
+          <canvas id="c-invariance" width="640" height="440"></canvas>
+          <p class="readout" id="r-invariance">(1,1) 방향은 A를 적용해도 그대로 — 고유벡터입니다.</p>
+        </div>
+      </div>
+      <details class="snippet-box">
+        <summary>Python 코드로 보기</summary>
+        <pre class="snippet"><code>import numpy as np
+
+A = np.array([[2, 1], [1, 2]])
+v_eigen, v_other = np.array([1, 1]), np.array([1, 0])
+print(A @ v_eigen)   # [3 3] = 3*(1,1) -> 방향 불변
+print(A @ v_other)   # [2 1] -> 방향이 꺾임(가변)</code></pre>
+      </details>
+    </section>
+
+    <!-- 16. 기저의 변환 -->
+    <section id="basis" class="topic">
+      <h2>기저의 변환 <span class="en">Change of Basis</span></h2>
+      <p class="topic-lead">기저 변환은 벡터 자체를 이동시키지 않고, 동일한 벡터를 표현하는 좌표 체계를 변경한다. 이러한 관점은 좌표에 의존하는 성분과 좌표와 무관한 기하적 대상을 구분하는 데 중요하다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 벡터공간의 기저란, 그 공간의 모든 벡터를 유일한 방식으로 선형결합해 만들어낼 수 있는 벡터들의 집합이다. 다른 기저 \(B=\{b_1,b_2\}\)를 쓰면 같은 벡터라도 좌표가 달라지는데, 이를 기저의 변환이라 한다.</p>
+          <p class="interp"><strong>기하적으로.</strong> 같은 화살표를 다른 "눈금(격자)"으로 읽는 것과 같다. 표준 격자로 읽으면 v=(3,1)이지만, \(b_1=(1,1)\), \(b_2=(-1,1)\)이 만드는 기울어진 격자로 읽으면 같은 화살표가 (2,-1)로 읽힌다 — 화살표는 하나인데 눈금이 다르니 숫자가 다르다.</p>
+          <p class="interp"><strong>대수적으로.</strong> 새 기저벡터들을 열로 쌓은 변환행렬 \(P=[b_1\ b_2]\)를 이용해 \([v]_E = P[v]_B\), 즉 \([v]_B = P^{-1}[v]_E\)로 좌표를 바꾼다.</p>
+          <p class="formula">\[\begin{aligned} P &= [b_1\ b_2] \\ [v]_E &= P[v]_B \\ [v]_B &= P^{-1}[v]_E \end{aligned}\]</p>
+          <p class="hint">회색 격자는 표준기저, 색이 있는 기울어진 격자는 새 기저 B입니다. b₁, b₂ 또는 v를 자유롭게 드래그해보세요.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-basis" width="640" height="440"></canvas>
+          <p class="readout" id="r-basis">v (표준좌표) = (3.00, 1.00) &nbsp;·&nbsp; [v]_B (새 기저 좌표) = (2.00, -1.00)</p>
+        </div>
+      </div>
+      <details class="snippet-box">
+        <summary>Python 코드로 보기</summary>
+        <pre class="snippet"><code>import numpy as np
+
+b1, b2 = np.array([1, 1]), np.array([-1, 1])
+P = np.column_stack([b1, b2])     # transition matrix
+v = np.array([3, 1])              # 표준좌표
+v_B = np.linalg.solve(P, v)       # 새 기저 좌표
+print(v_B)                        # [ 2. -1.]</code></pre>
+      </details>
+    </section>
+
+    <!-- 17. PyTorch -->
+    <section id="pytorch" class="topic">
+      <h2>PyTorch와의 연결 <span class="en">einsum · permute · view · reshape</span></h2>
+      <p class="topic-lead">앞에서 다룬 내적, 행렬곱, 전치는 PyTorch의 텐서 연산에 직접 대응한다. 이 절에서는 수학적 연산이 텐서의 shape과 stride, 그리고 실제 메모리 배치와 어떤 관계를 갖는지 살펴본다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <h3>einsum</h3>
+          <p class="definition"><strong>정의.</strong> einsum(Einstein summation)은 "반복되는 인덱스는 곱한 뒤 합산한다"는 아인슈타인 표기 규칙으로 텐서 축소 연산을 표현하는 방법이다.</p>
+          <p class="interp"><strong>기하적으로(직관적으로).</strong> 텐서를 "몇 개의 축을 가진 표"라고 생각하면, einsum은 어떤 축을 남기고 어떤 축을 합쳐서 더할지 정하는 것이다.</p>
+          <p class="interp"><strong>대수적으로.</strong> 지금까지 배운 내적, 외적, 행렬곱, 전치가 모두 einsum의 특수한 경우다 — 오른쪽 프리셋 버튼을 눌러 비교해보세요.</p>
+        </div>
+        <div class="topic-demo">
+          <div class="controls preset-row" id="einsum-presets">
+            <button type="button" data-eq="dot" class="active">i,i→ &nbsp;내적</button>
+            <button type="button" data-eq="outer">i,j→ij &nbsp;외적</button>
+            <button type="button" data-eq="matmul">ij,jk→ik &nbsp;행렬곱</button>
+            <button type="button" data-eq="trace">ii→ &nbsp;trace</button>
+            <button type="button" data-eq="transpose">ij→ji &nbsp;전치</button>
+          </div>
+          <div id="einsum-view" class="einsum-view"></div>
+        </div>
+      </div>
+
+      <div class="topic-body">
+        <div class="topic-text">
+          <h3>permute · view · reshape — 각각의 정의, 그리고 차이</h3>
+          <p class="definition"><strong>정의 (permute).</strong> 텐서의 축 순서를 재배열하는 연산이다. 저장된 메모리를 복사하지 않고 shape과 stride를 바꾸므로, 같은 버퍼를 공유하면서도 논리적인 인덱스와 값의 배치는 달라진다. 2차원에서 <code>permute(1, 0)</code>은 전치와 같다.</p>
+          <p class="definition"><strong>정의 (view).</strong> 텐서의 저장 공간을 공유한 채 다른 shape으로 해석하는 연산이다. 원소 수가 같고 요청한 shape이 기존 shape·stride와 호환되어야 한다. contiguous 텐서에서는 일반적으로 가능하지만, 모든 non-contiguous 텐서가 반드시 실패하는 것은 아니다.</p>
+          <p class="definition"><strong>정의 (reshape).</strong> view와 목적은 같지만, 가능한 경우 view를 반환하고 그렇지 않으면 데이터를 복사해 새 텐서를 만든다. 따라서 호출자는 결과가 원본과 저장 공간을 공유한다고 가정해서는 안 된다.</p>
+          <p class="interp"><strong>차이 — 기하적으로(직관적으로).</strong> 버퍼를 한 줄로 늘어선 상자라고 생각하면, permute는 "몇 칸마다 다음 줄로 넘어갈지"(stride)를 다시 정하는 것이고, view/reshape는 상자들을 처음부터 순서대로 다시 묶는 것이다. <em>view</em>는 버퍼를 순서대로 읽으면 되지만(칸 옆 작은 숫자 = 버퍼 위치), <em>permute</em>는 그리드를 채우는 순서와 버퍼 순서가 어긋나 건너뛰며 읽어야 한다.</p>
+          <p class="interp"><strong>차이 — 메모리 관점에서.</strong> permute는 shape과 stride를 함께 바꾸지만 버퍼는 그대로 둔다. shape (3,2)의 표준 stride는 (2,1)인데 이 예제의 permute 결과는 (1,3)이므로 non-contiguous다. view는 현재 stride로 표현 가능한 shape만 만들 수 있고, reshape는 필요할 때 contiguous 복사본을 만든 뒤 shape을 바꾼다.</p>
+          <p class="interp"><strong>수학과의 연결.</strong> 2차원 텐서의 <code>permute(1,0)</code>은 행렬의 전치다. 표준 내적을 사용하는 실수 공간에서 전치행렬 \(A^\top\)은 선형사상 A의 수반을 나타내며, \(\langle Ax,y\rangle=\langle x,A^\top y\rangle\)를 만족한다. 더 높은 차원의 permute와 reshape/view는 축 및 인덱스의 재배열로 수학적으로 기술할 수 있지만, PyTorch에서 복사가 발생하는지는 구체적인 shape·stride와 메모리 배치에 달려 있다.</p>
+          <p class="hint">x = torch.arange(6).reshape(2,3)에서 시작해서 view(3,2)와 permute(1,0)을 비교해보세요. 둘 다 shape은 (3,2)이지만 <strong>내용이 다릅니다.</strong></p>
+        </div>
+        <div class="topic-demo">
+          <div class="controls preset-row">
+            <button type="button" id="tensor-reset">초기화 x (2,3)</button>
+            <button type="button" id="tensor-view">.view(3,2)</button>
+            <button type="button" id="tensor-permute">.permute(1,0)</button>
+          </div>
+          <div id="tensor-view-box" class="tensor-box"></div>
+          <p class="tensor-label">실제 메모리 버퍼 (항상 이 순서 그대로, 절대 안 바뀜)</p>
+          <div id="tensor-buffer" class="buffer-strip"></div>
+          <p class="readout" id="r-tensor">shape = (2, 3) &nbsp;·&nbsp; stride = (3, 1) &nbsp;·&nbsp; contiguous = True</p>
+        </div>
+      </div>
+
+      <details class="snippet-box">
+        <summary>Python 코드로 보기</summary>
+        <pre class="snippet"><code>import torch
+
+x = torch.arange(6).reshape(2, 3)     # [[0,1,2],[3,4,5]]
+print(x.view(3, 2))                   # [[0,1],[2,3],[4,5]]  메모리 순서 그대로 재해석
+print(x.permute(1, 0))                # [[0,3],[1,4],[2,5]]  진짜 전치, 값 배치가 다름!
+print(x.permute(1, 0).is_contiguous())  # False -> .view() 불가, .reshape()는 복사해서 동작
+
+A = torch.tensor([[1., 2.], [3., 4.]])
+B = torch.tensor([[5., 6.], [7., 8.]])
+print(torch.einsum('ij,jk->ik', A, B))   # 행렬곱, A @ B 와 동일
+print(torch.einsum('ii->', A))           # trace = 고유값의 합
+a = torch.tensor([1., 2., 3.]); b = torch.tensor([4., 5., 6.])
+print(torch.einsum('i,i->', a, b))       # 내적 = 32.0</code></pre>
+      </details>
+    </section>
+
+        <a class="back-link" href="../../index.html">&larr; Back to all posts</a>
+      </div>
+    </div>

@@ -1,0 +1,31 @@
+# macOS
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.npm/
+
+# Env / local secrets
+.env
+.env.*
+!.env.example
+
+# Agent tooling
+.agent/
+.agents/
+.claude/
+
+# Logs & temp
+*.log
+tmp/
+.cache/

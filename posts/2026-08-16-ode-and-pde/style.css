@@ -1,0 +1,12 @@
+/*
+ * Differential-equations post. Everything shared lives in css/post.css and
+ * css/components.css; only what is specific to this post's figures is here.
+ */
+
+/* Several sections stack a particle strip directly above the density plot it
+   produces, and the pair should read as one figure rather than two. */
+.topic-demo canvas + canvas { margin-top: -1px; }
+
+/* Space–time panels are wide and short; the shared 300px default is too tall. */
+#c-pdeintro-st,
+#c-transport-st { height: 200px; }

@@ -1,0 +1,593 @@
+    <div class="la-hero" id="intro">
+      <a class="language-link" href="./index.html" lang="en">English ver.</a>
+      <h1>Basic Definition of probability</h1>
+      <p class="la-meta"><time datetime="2026-07-23">2026.07.23</time></p>
+      <p class="la-footnote">참고: <a href="https://www.deeplearningbook.org/contents/prob.html" target="_blank" rel="noopener noreferrer">Goodfellow, Bengio &amp; Courville, <em>Deep Learning</em> — Chapter 3: Probability and Information Theory</a>. 정보이론(엔트로피·KL·크로스엔트로피)은 별도의 글로 다룹니다.</p>
+      <!-- intro:start -->
+      <p class="la-sub">
+        앞선 <a href="../2026-07-14-linear-algebra/ko.html">선형대수</a> 글에서 데이터는 벡터와 행렬로 표현되고, 모델은 그 표현을 변환하는 선형사상이었습니다. 그런데 같은 입력을 같은 모델에 두 번 넣었을 때 <em>다른</em> 답이 나오는 상황은 이 언어만으로는 설명되지 않습니다. 언어 모델은 같은 프롬프트에서 매번 다른 문장을 생성하고, 확산 모델은 같은 조건에서 매번 다른 이미지를 만듭니다. 결정론적 함수가 아니라 <strong>분포</strong>를 다루고 있기 때문입니다.
+      </p>
+      <p class="la-sub">
+        머신러닝에서 확률이 필요한 이유는 크게 세 가지입니다. 첫째, 세계가 본질적으로 확률적이거나(내재적 확률성), 관측이 불완전하거나(불완전 관측), 모델이 단순화되어 있어서(불완전 모델링) 예측에는 언제나 <strong>불확실성</strong>이 남습니다. 둘째, 그 불확실성을 정량화해야 "이 예측을 얼마나 믿을 것인가"를 판단할 수 있습니다. 셋째, 데이터를 생성하는 분포 자체를 학습하면 <strong>새로운 표본을 만들어낼 수 있습니다</strong> — 생성 모델이 하는 일이 정확히 이것입니다.
+      </p>
+      <p class="la-sub">
+        그래서 확률은 손실함수의 형태까지 결정합니다. 분류에서 쓰는 크로스엔트로피, 회귀에서 쓰는 MSE, 로버스트 회귀의 MAE, 그리고 L2·L1 정규화는 각각 서로 다른 확률 모델의 <strong>음의 로그가능도(negative log-likelihood)</strong>로 유도됩니다. 손실함수를 외우는 대신 "이 모델이 어떤 분포를 가정하고 있는가"를 물으면, 왜 그 식이어야 하는지가 따라 나옵니다.
+      </p>
+      <p class="la-sub">
+        이 글은 확률변수의 정의에서 시작해 PMF·PDF와 샘플링, 결합·주변·조건부 확률, 연쇄법칙과 독립, 기대값·분산·공분산을 거쳐 최대가능도 추정과 베이즈 정리, MAP까지 이어집니다. 분포는 카탈로그처럼 나열하는 대신 머신러닝의 손실함수와 직접 맞닿는 세 가지 — 분류의 <strong>카테고리 분포</strong>, 회귀의 <strong>가우시안</strong>, 그리고 그 대안인 <strong>라플라스</strong> — 만 골라 깊이 다룹니다. 각 개념은 정의, 직관, 대수적 표현, 그리고 머신러닝에서의 쓰임 순서로 설명합니다.
+      </p>
+      <!-- intro:end -->
+    </div>
+
+    <div class="la-layout">
+      <nav class="la-index" aria-label="이 글의 주제">
+        <p class="la-index-title">Index</p>
+        <a href="#intro">Basic Definition of probability</a>
+        <a href="#randomvar">확률변수</a>
+        <a href="#probabilitydistribution">확률분포</a>
+        <a href="#distribution">PMF · PDF</a>
+        <a href="#sampling">샘플링</a>
+        <a href="#joint">결합확률</a>
+        <a href="#marginal">주변화</a>
+        <a href="#conditional">조건부확률</a>
+        <a href="#chainrule">연쇄법칙</a>
+        <a href="#independence">독립</a>
+        <a href="#expectation">기대값</a>
+        <a href="#variance">분산</a>
+        <a href="#covariance">공분산 · 상관</a>
+        <a href="#categorical">Categorical</a>
+        <a href="#gaussian">Gaussian</a>
+        <a href="#laplace">Laplace</a>
+        <a href="#likelihood">가능도</a>
+        <a href="#mle">최대가능도 추정</a>
+        <a href="#nll">로그가능도 · NLL</a>
+        <a href="#bayes">베이즈 정리</a>
+        <a href="#map">Prior · MAP</a>
+      </nav>
+
+      <div class="la-content">
+
+    <!-- 1. 확률변수 -->
+    <section id="randomvar" class="topic">
+      <h2>확률변수 <span class="en">Random Variables</span></h2>
+      <p class="topic-lead">확률변수는 "어떤 일이 일어날 수 있는가"라는 서술을 수(數)로 옮기는 장치다. 주사위의 눈, 분류 모델의 정답 레이블, 사람의 키처럼 성격이 전혀 다른 대상들이 확률변수라는 하나의 형식 위에서 똑같이 다뤄진다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 확률변수 \(X\)는 표본공간 \(\Omega\)의 각 결과 \(\omega\)에 실수를 대응시키는 함수 \(X:\Omega\to\mathbb{R}\)다. 이름과 달리 확률변수 자체는 무작위하지 않다 — 그것은 <em>함수</em>이며, 무작위한 것은 어떤 \(\omega\)가 뽑히느냐다. 관례상 확률변수는 대문자 \(X\)로, 그것이 실제로 취한 값은 소문자 \(x\)로 쓴다.</p>
+          <p class="interp"><strong>왜 이런 장치가 필요한가.</strong> "주사위를 굴려 짝수가 나온다", "이 사진은 고양이다", "이 사람의 키는 170cm 근처다"는 서로 다른 종류의 서술이다. 확률변수는 이들을 모두 <em>수에 대한 서술</em>로 바꾼다. 일단 수가 되면 더하고, 평균 내고, 미분할 수 있다. 머신러닝이 확률을 다룰 수 있는 것은 이 번역 덕분이다.</p>
+          <p class="interp"><strong>이산과 연속.</strong> \(X\)가 취할 수 있는 값이 유한하거나 셀 수 있으면 이산 확률변수이고, 실수 구간 전체를 채우면 연속 확률변수다. 이 구분이 다음 절의 PMF와 PDF를 가른다. 오른쪽 그림에서 주사위와 클래스 레이블은 막대로, 키는 매끄러운 곡선으로 그려지는 것이 그 차이다.</p>
+          <p class="interp"><strong>머신러닝에서.</strong> 학습에 등장하는 거의 모든 대상이 확률변수다. 입력 <strong>특징</strong> \(X\), 정답 <strong>레이블</strong> \(Y\), 관측되지 않는 <strong>잠재변수</strong> \(Z\)(VAE의 코드, 혼합모델의 성분 번호), 강화학습의 <strong>행동</strong> \(A\)와 <strong>보상</strong> \(R\)이 그렇다. 모델을 세운다는 것은 이들 사이의 결합분포나 조건부분포를 정하는 일이다.</p>
+          <p class="formula">\[\begin{aligned} X &amp;: \Omega \to \mathbb{R} \\ P(X = x) &amp;= P(\{\omega \in \Omega : X(\omega) = x\}) \end{aligned}\]</p>
+          <p class="hint">세 개의 버튼을 눌러보세요. 표본공간의 결과(주사위 눈, 이미지)가 어떻게 하나의 수로 옮겨지는지, 그리고 연속 변수에서는 왜 막대가 아니라 <strong>면적</strong>이 확률이 되는지 비교할 수 있습니다.</p>
+        </div>
+        <div class="topic-demo">
+          <div class="controls preset-row" id="rv-presets">
+            <button type="button" data-kind="die" class="active">주사위</button>
+            <button type="button" data-kind="label">클래스 레이블</button>
+            <button type="button" data-kind="height">키 (연속)</button>
+          </div>
+          <canvas id="c-randomvar" width="640" height="380"></canvas>
+          <p class="readout" id="r-randomvar"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Probability Distribution -->
+    <section id="probabilitydistribution" class="topic">
+      <h2>확률분포 <span class="en">Probability Distributions</span></h2>
+      <p class="topic-lead">확률변수가 무엇을 숫자로 관찰할지 정한다면, 확률분포는 그 숫자들이 어떤 값에 얼마나 자주 나타나는지를 정한다. 분포는 가능한 값 전체와 그 값들 사이에 확률이 배치된 모습을 함께 나타낸다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 확률변수 \(X\)의 확률분포는 각 집합 \(A\)에 \(P(X\in A)\)를 대응시키는 확률 법칙이다. 쉽게 말해 “\(X\)가 어느 값이나 범위에 들어갈 가능성이 얼마인가?”라는 모든 질문의 답을 모아놓은 것이다. 이산 변수에서는 각 값의 확률을 나열할 수 있고, 연속 변수에서는 구간에 들어갈 확률로 분포를 기술한다.</p>
+          <p class="interp"><strong>확률변수와 분포는 다르다.</strong> 확률변수 \(X\)는 표본공간의 결과를 숫자로 번역하는 <em>규칙</em>이고, 분포는 그 번역 결과에 확률이 어떻게 놓이는지를 나타내는 <em>행동 패턴</em>이다. 프로그램에 비유하면 확률변수는 무엇을 반환할지 정한 변수 또는 함수이고, 분포는 그 코드를 여러 번 실행했을 때 반환값들이 만드는 통계적 패턴이다.</p>
+          <p class="interp"><strong>서로 다른 확률변수가 같은 분포를 가질 수 있다.</strong> 동전의 앞면을 1, 뒷면을 0으로 옮긴 \(X\)와 시험 합격을 1, 불합격을 0으로 옮긴 \(Y\)는 서로 다른 실험에서 정의된 확률변수다. 하지만 앞면 확률과 합격 확률이 모두 0.7이면 두 변수는 똑같은 \(\mathrm{Bernoulli}(0.7)\) 분포를 따른다. 분포는 결과가 생겨난 구체적인 이야기는 버리고 값과 확률의 구조만 남긴다.</p>
+          <p class="interp"><strong>같은 종류의 변수도 서로 다른 분포를 가질 수 있다.</strong> 두 주사위가 모두 1부터 6까지를 값으로 갖더라도 하나는 공정하고 다른 하나는 6이 더 자주 나온다면 분포가 다르다. 가능한 값의 목록만 아는 것으로는 충분하지 않고, 각 값에 놓인 확률까지 알아야 변수의 행동을 예측할 수 있다.</p>
+          <p class="interp"><strong>표기법.</strong> \(X\sim p\) 또는 \(X\sim\mathcal D\)는 “\(X\)가 분포 \(p\) 또는 \(\mathcal D\)를 따른다”고 읽는다. \(X\sim\mathcal N(\mu,\sigma^2)\)라면 분포의 종류는 가우시안이고, \(\mu\)와 \(\sigma^2\)는 그 분포의 위치와 퍼짐을 정하는 <strong>파라미터</strong>다. 하나의 이름 아래 파라미터만 달라지는 분포들의 모음을 <strong>분포족</strong>이라 한다.</p>
+          <p class="interp"><strong>분포를 어떻게 적는가.</strong> 분포는 하나의 개념이고 PMF·PDF·CDF는 그 분포를 표현하는 서로 다른 도구다. 이산 변수는 PMF로 각 값의 확률을 직접 적고, 연속 변수는 PDF의 면적으로 구간 확률을 나타낸다. CDF는 이산과 연속 모두에서 사용할 수 있다. 다음 절에서는 이 세 표현의 차이를 구체적으로 살펴본다.</p>
+          <p class="formula">\[\begin{aligned} X\sim\mathcal D &amp;\quad\Longleftrightarrow\quad P(X\in A)=\mathcal D(A) \\ X\sim\mathrm{Bernoulli}(0.7) &amp;\quad\Rightarrow\quad P(X=1)=0.7 \\ X\sim\mathcal N(\mu,\sigma^2) &amp;\quad\Rightarrow\quad \mu:\text{ 중심},\;\sigma^2:\text{ 퍼짐} \end{aligned}\]</p>
+        </div>
+        <div class="topic-demo">
+          <div class="controls preset-row" id="pdemo-presets">
+            <button type="button" data-kind="coin" class="active">동전 X</button>
+            <button type="button" data-kind="exam">합격 여부 Y</button>
+            <button type="button" data-kind="die">주사위 Z</button>
+          </div>
+          <canvas id="c-probabilitydistribution" width="640" height="360"></canvas>
+          <div class="controls">
+            <label><span id="pdemo-param-name">성공 확률 p</span> = <span id="pdemo-param-val">0.70</span> <input id="pdemo-param" type="range" min="0" max="1" step="0.01" value="0.7"></label>
+          </div>
+          <p class="readout" id="r-probabilitydistribution"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. PMF, PDF & Probability -->
+    <section id="distribution" class="topic">
+      <h2>PMF · PDF와 확률 <span class="en">PMF, PDF &amp; Probability</span></h2>
+      <p class="topic-lead">이산 확률변수는 각 값에 확률을 직접 배정하지만(PMF), 연속 확률변수는 한 점의 확률이 0이므로 밀도를 배정하고 구간을 적분해야 확률이 나온다(PDF). 두 세계는 단절된 것이 아니라 구간 폭을 좁히면 자연스럽게 이어진다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의 (PMF).</strong> 이산 확률변수의 확률질량함수 \(P(x)\)는 각 값에 확률을 직접 배정한다. 조건은 두 가지뿐이다: 모든 \(x\)에 대해 \(0\le P(x)\le 1\)이고, 전체 합이 \(\sum_x P(x)=1\)이다.</p>
+          <p class="definition"><strong>정의 (PDF).</strong> 연속 확률변수에서는 한 점의 확률이 0이다 — 키가 정확히 170.000…cm일 확률은 0이다. 그래서 확률 대신 <em>밀도</em> \(p(x)\ge 0\)를 배정하고, 확률은 구간을 적분해서 얻는다. 전체 적분이 \(\int p(x)\,dx=1\)이면 된다.</p>
+          <p class="interp"><strong>밀도는 확률이 아니다.</strong> 이것이 가장 흔한 오해다. \(P(x)\)는 1을 넘을 수 없지만 \(p(x)\)는 얼마든지 1을 넘을 수 있다. 예를 들어 구간 \([0,\,0.1]\) 위의 균등분포는 밀도가 10이다. 밀도는 <em>단위 길이당</em> 확률이므로, 폭 \(\Delta\)를 곱해야 비로소 확률이 된다: \(P(x\le X\le x+\Delta)\approx p(x)\,\Delta\).</p>
+          <p class="interp"><strong>두 세계는 이어져 있다.</strong> 연속 분포를 폭 \(\Delta\)의 구간으로 잘라 각 칸의 확률을 모으면 이산 분포가 된다. 오른쪽 그림에서 \(\Delta\)를 줄이면 막대가 점점 촘촘해지며 곡선에 달라붙는데, 이것이 PMF에서 PDF로 가는 극한이다. 반대로 말하면 <strong>연속 확률변수를 구간으로 이산화하는 것은 언제나 가능</strong>하며, 실제로 이미지 픽셀 값이나 오디오 샘플이 그렇게 다뤄진다.</p>
+          <p class="interp"><strong>CDF: 둘을 하나로 묶는 표현.</strong> 누적분포함수 \(F(x)=P(X\le x)\)는 이산이든 연속이든 똑같이 정의된다. 단조증가하고 \(-\infty\)에서 0, \(+\infty\)에서 1로 간다. 구간 확률은 뺄셈 한 번으로 나온다: \(P(a\le X\le b)=F(b)-F(a)\). 다음 절의 샘플링이 바로 이 함수를 이용한다.</p>
+          <p class="formula">\[\begin{aligned} \textstyle\sum_x P(x) &amp;= 1 &amp;&amp; \text{(PMF)} \\ \int_{-\infty}^{\infty} p(x)\,dx &amp;= 1 &amp;&amp; \text{(PDF)} \\ P(a\le X\le b) &amp;= \int_a^b p(x)\,dx = F(b)-F(a) \end{aligned}\]</p>
+          <p class="hint">Δ 슬라이더를 줄여보세요. 막대(이산화한 확률)가 곡선(밀도)에 수렴합니다. 리드아웃의 "막대 높이 × Δ = 확률" 관계를 함께 보면 밀도와 확률의 차이가 분명해집니다. "CDF 보기"로 누적 형태도 확인해보세요.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-distribution" width="640" height="380"></canvas>
+          <div class="controls">
+            <label>구간 폭 Δ = <span id="dist-bw-val">1.00</span> <input id="dist-bw" type="range" min="0.05" max="1.5" step="0.05" value="1"></label>
+            <button type="button" id="dist-cdf" class="toggle">CDF 보기</button>
+          </div>
+          <p class="readout" id="r-distribution"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Sampling -->
+    <section id="sampling" class="topic">
+      <h2>샘플링 <span class="en">Sampling</span></h2>
+      <p class="topic-lead">분포를 안다는 것과 그 분포에서 표본을 뽑을 수 있다는 것은 다른 능력이다. 표본이 쌓이면서 히스토그램이 원래 밀도로 수렴하는 과정은 몬테카를로 추정, SGD의 미니배치, 생성 모델의 샘플링이 모두 기대고 있는 사실이다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 분포 \(p\)에서 표본을 뽑는다는 것은, 각 값이 나올 상대빈도가 장기적으로 \(p\)와 일치하도록 값을 생성하는 것이다. 이를 \(x^{(i)}\sim p(x)\)로 쓴다. 분포의 <em>식을 아는 것</em>과 그 분포에서 <em>표본을 뽑을 수 있는 것</em>은 별개의 능력이며, 후자가 없으면 생성 모델은 존재할 수 없다.</p>
+          <p class="interp"><strong>표본이 쌓이면 분포가 드러난다.</strong> \(N\)개의 표본으로 히스토그램을 그리면 원래 밀도의 근사가 된다. \(N\)이 작을 때는 울퉁불퉁하지만 커질수록 매끄러워지고, 표본평균과 참 기대값의 차이는 대략 \(1/\sqrt{N}\)의 속도로 줄어든다. 이 수렴 속도가 느리다는 점이 중요하다 — 정밀도를 10배 올리려면 표본이 100배 필요하다.</p>
+          <p class="interp"><strong>어떻게 뽑는가: 역변환 샘플링.</strong> 대부분의 의사난수 생성기는 균등한 정수나 \(\mathrm{Uniform}(0,1)\) 난수를 기본 재료로 제공하고, 다른 분포의 난수는 이를 변환해 만든다. 균등난수 \(u\)를 뽑아 \(x=F^{-1}(u)\)를 계산하면 그 \(x\)는 \(p\)를 따른다. CDF가 \(x\)축의 확률질량을 \(y\)축의 \([0,1]\)로 <em>공평하게 펴놓기</em> 때문이다. 다만 \(F^{-1}\)을 쉽게 계산할 수 없는 분포에서는 거절 샘플링 같은 다른 방법을 쓴다.</p>
+          <p class="interp"><strong>머신러닝에서.</strong> 계산하기 어려운 기대값을 표본평균으로 대신하는 것이 <strong>몬테카를로 추정</strong>이다. 전체 데이터셋의 예제를 균등하게 뽑은 미니배치 평균으로 전체 손실을 근사하는 SGD가 대표적인 예다. 이런 표준적인 균등추출 조건 아래에서 미니배치 gradient는 전체 데이터 gradient의 <em>불편추정량</em>이 된다. 확산 모델이 노이즈에서 이미지를 만들어내는 과정, 언어 모델이 토큰을 하나씩 뽑는 과정도 모두 샘플링이다.</p>
+          <p class="formula">\[\begin{aligned} x^{(i)} &amp;\sim p(x), \quad i=1,\ldots,N \\ \mathbb{E}_{p}[f(X)] &amp;\approx \frac{1}{N}\sum_{i=1}^{N} f(x^{(i)}) \\ u &amp;\sim \mathrm{Uniform}(0,1) \;\Rightarrow\; F^{-1}(u) \sim p \end{aligned}\]</p>
+          <p class="hint">N 슬라이더를 1에서 10,000까지 올려보세요. 히스토그램이 주황색 밀도 곡선으로 수렴하고, 리드아웃의 오차가 줄어듭니다. "다시 뽑기"를 누르면 같은 N에서도 결과가 달라진다는 점 — 표본은 언제나 우연을 포함합니다. 아래 그림은 균등난수 하나가 어떻게 원하는 분포의 표본이 되는지 보여줍니다.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-sampling" width="640" height="360"></canvas>
+          <div class="controls">
+            <label>N = <span id="samp-n-val">100</span> <input id="samp-n" type="range" min="1" max="4" step="0.01" value="2"></label>
+            <button type="button" id="samp-reseed">다시 뽑기</button>
+          </div>
+          <p class="readout" id="r-sampling"></p>
+          <p class="tensor-label">역변환 샘플링: uniform u를 CDF로 되돌려 x를 얻는다</p>
+          <canvas id="c-sampling-inv" width="640" height="300"></canvas>
+          <p class="readout" id="r-sampling-inv"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Joint Probability -->
+    <section id="joint" class="topic">
+      <h2>결합확률 <span class="en">Joint Probability</span></h2>
+      <p class="topic-lead">두 개 이상의 확률변수를 동시에 다루면 확률은 표가 아니라 격자 위에 놓인다. 결합분포는 변수들이 함께 어떤 값을 취하는지를 남김없이 기술하며, 이후의 주변화와 조건부는 모두 이 격자를 다르게 읽는 방법이다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 두 확률변수 \(X, Y\)의 결합분포 \(P(X=x,\,Y=y)\)는 둘이 <em>동시에</em> 그 값을 취할 확률이다. 이산에서는 격자 위의 표가 되고, 모든 칸의 합이 1이다: \(\sum_x\sum_y P(x,y)=1\). 연속에서는 결합밀도 \(p(x,y)\)의 이중적분이 1이 된다.</p>
+          <p class="interp"><strong>결합분포는 모든 것을 담는다.</strong> \(X\)와 \(Y\)에 대해 물을 수 있는 모든 질문의 답이 이 표 안에 있다. \(X\)만의 분포도, \(Y\)만의 분포도, 하나가 주어졌을 때 다른 하나의 분포도 전부 이 격자를 <em>다르게 읽어서</em> 얻는다. 다음 세 절(주변화·조건부·연쇄법칙)이 바로 그 읽는 방법들이다.</p>
+          <p class="interp"><strong>대가는 크기다.</strong> 각 변수가 \(K\)개의 값을 가지면 격자는 \(K^2\)칸, 변수가 \(n\)개면 \(K^n\)칸이 필요하다. 어휘 크기 5만인 언어 모델에서 두 단어의 결합분포만 해도 25억 칸이다. 이 지수적 폭발이 확률 모델링의 근본 문제이며, 독립 가정·조건부 독립·인수분해·신경망 파라미터화가 모두 이 문제를 피하려는 시도다.</p>
+          <p class="interp"><strong>머신러닝에서.</strong> 생성 모델이 학습하려는 대상이 결국 데이터의 결합분포 \(p(x_1,\ldots,x_n)\)다. 잠재변수 모델은 여기에 관측되지 않는 \(Z\)를 끼워 넣어 \(p(x,z)\)를 다루고, 관측된 부분만 필요할 때 \(z\)를 합쳐 없앤다. 그 연산이 다음 절의 주변화다.</p>
+          <p class="formula">\[\begin{aligned} P(x,y) &amp;\ge 0 \\ \textstyle\sum_x\sum_y P(x,y) &amp;= 1 \\ \iint p(x,y)\,dx\,dy &amp;= 1 \end{aligned}\]</p>
+          <p class="hint">셀을 위아래로 드래그해 값을 바꿔보세요 (키보드 방향키도 됩니다). 한 칸을 키우면 나머지가 자동으로 재정규화되어 합이 1로 유지됩니다. 프리셋 버튼으로 "상관 있음 / 독립 / 균등"을 비교해보세요 — 이 격자는 다음 네 절에서 계속 등장합니다.</p>
+        </div>
+        <div class="topic-demo">
+          <div id="joint-heatmap" class="heatmap-box"></div>
+          <div class="controls preset-row" id="joint-presets">
+            <button type="button" data-preset="corr" class="active">상관 있음</button>
+            <button type="button" data-preset="indep">독립</button>
+            <button type="button" data-preset="uniform">균등</button>
+          </div>
+          <p class="readout" id="r-joint"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Marginalization -->
+    <section id="marginal" class="topic">
+      <h2>주변화 <span class="en">Marginalization</span></h2>
+      <p class="topic-lead">결합분포에서 관심 없는 변수를 합쳐 없애면 남은 변수의 분포가 나온다. 잠재변수를 지우고 관측변수의 분포만 얻는 이 연산이 잠재변수 모델과 베이즈 추론의 계산 부담이 발생하는 지점이다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의 (합의 법칙).</strong> 결합분포에서 한 변수를 모든 값에 대해 합치면 나머지 변수의 분포가 남는다. 이렇게 얻은 \(P(x)\)를 <em>주변분포</em>라 부르고, 그 연산을 주변화라 한다. 연속에서는 합이 적분으로 바뀔 뿐 논리는 같다.</p>
+          <p class="interp"><strong>왜 "주변"인가.</strong> 이름은 종이에 격자를 그리고 각 행과 열의 합을 <em>가장자리(margin)</em>에 적던 관습에서 왔다. 오른쪽 그림에서 \(Y\)를 합치면 각 열의 합이 아래쪽 여백에 \(P(X)\)로 남고, \(X\)를 합치면 각 행의 합이 옆 여백에 \(P(Y)\)로 남는다.</p>
+          <p class="interp"><strong>정보를 버리는 연산이다.</strong> 주변화는 되돌릴 수 없다. \(P(x)\)와 \(P(y)\)를 알아도 \(P(x,y)\)는 복원되지 않는다 — 같은 주변분포를 갖는 결합분포가 무수히 많기 때문이다(다음 절의 "독립" 데모에서 \(t\)를 움직여도 주변분포는 변하지 않는 것이 그 예다). 합쳐 없앤 변수에 대한 정보는 사라진다.</p>
+          <p class="interp"><strong>머신러닝에서: 여기가 병목이다.</strong> 잠재변수 모델은 \(p(x)=\int p(x,z)\,dz\)로 정의되는데, 복잡한 모델에서는 이 적분을 정확히 계산하기 어려운 경우가 많다. VAE가 ELBO라는 하한을 대신 최적화하고, 베이즈 추론이 증거 \(p(x)=\int p(x\mid\theta)p(\theta)\,d\theta\) 때문에 MCMC나 변분추론에 의존하는 이유가 이 주변화에 있다. 확산 모델 역시 여러 중간 잠재상태를 도입해 직접 다루기 어려운 데이터 가능도를 단계별 확률과 계산 가능한 학습목표로 바꾼다.</p>
+          <p class="formula">\[\begin{aligned} P(x) &amp;= \sum_y P(x,y) \\ p(x) &amp;= \int p(x,y)\,dy \\ p(x) &amp;= \int p(x,z)\,dz \quad\text{(잠재변수 제거)} \end{aligned}\]</p>
+          <p class="hint">버튼으로 합칠 축을 바꿔보세요. 리드아웃의 막대가 해당 방향의 합을 보여주고, 합계는 언제나 1입니다. 격자 셀을 드래그해 결합분포를 바꿔도 주변분포가 어떻게 따라 움직이는지 확인해보세요.</p>
+        </div>
+        <div class="topic-demo">
+          <div id="marginal-heatmap" class="heatmap-box"></div>
+          <div class="controls preset-row" id="marginal-axis">
+            <button type="button" data-axis="y" class="active">Y를 합쳐 P(X) 얻기</button>
+            <button type="button" data-axis="x">X를 합쳐 P(Y) 얻기</button>
+          </div>
+          <p class="readout" id="r-marginal"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Conditional Probability -->
+    <section id="conditional" class="topic">
+      <h2>조건부확률 <span class="en">Conditional Probability</span></h2>
+      <p class="topic-lead">조건부확률은 결합분포에서 한 줄만 떼어낸 뒤 합이 다시 1이 되도록 정규화한 것이다. 지도학습이 학습하는 대상이 바로 이 분포이며, 입력이 주어졌을 때의 출력 분포라는 형태를 갖는다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> \(P(X=x)&gt;0\)일 때, \(X=x\)가 주어졌을 때 \(Y\)의 조건부확률은 결합확률을 조건의 확률로 나눈 것이다: \(P(y\mid x)=P(x,y)/P(x)\). 분모가 하는 일은 정규화다 — 떼어낸 조각의 합을 다시 1로 만든다.</p>
+          <p class="interp"><strong>기하적으로: 자르고 다시 재기.</strong> 격자에서 \(X=x\)인 열 하나만 남기고 나머지를 지운다. 그 열의 값들은 원래 격자 전체에 대한 비율이라 합이 1이 아니다. 열의 합 \(P(x)\)로 나누면 그 열 <em>안에서의</em> 비율이 되어 합이 1이 된다. 조건을 건다는 것은 <strong>표본공간을 좁힌 뒤 그 안에서 확률을 다시 재는 일</strong>이다.</p>
+          <p class="interp"><strong>조건을 바꾸면 분포가 바뀐다.</strong> 오른쪽에서 \(X\) 슬라이더를 움직이면 \(P(Y\mid X=x)\)의 모양이 달라진다. 이 변화가 곧 \(X\)가 \(Y\)에 대해 갖는 정보다. 만약 어떤 \(x\)를 골라도 모양이 똑같다면 \(X\)는 \(Y\)에 대해 아무것도 말해주지 않는 것이고, 그것이 바로 두 절 뒤의 독립이다.</p>
+          <p class="interp"><strong>머신러닝에서: 지도학습이 배우는 것이 이것이다.</strong> 분류 모델은 \(p(y\mid x)\)를, 회귀 모델도 \(p(y\mid x)\)를(대개 가우시안으로) 학습한다. 이미지 캡셔닝은 \(p(\text{텍스트}\mid\text{이미지})\)이고, 조건부 생성은 \(p(x\mid c)\)다. 신경망이 하는 일은 결합분포 격자를 통째로 외우는 대신, 입력 \(x\)를 받아 <em>그 열의 정규화된 분포를 바로 출력하는</em> 함수를 학습하는 것이다 — 그래서 \(K^n\)칸을 저장하지 않아도 된다.</p>
+          <p class="formula">\[\begin{aligned} P(y\mid x) &amp;= \frac{P(x,y)}{P(x)}, \qquad P(x)&gt;0 \\ \textstyle\sum_y P(y\mid x) &amp;= 1 \quad\text{(고정된 } x \text{에 대해)} \end{aligned}\]</p>
+          <p class="hint">X 슬라이더로 조건을 바꿔보세요. 선택된 열이 강조되고 나머지는 흐려지며, 리드아웃에 그 열을 정규화한 \(P(Y\mid X=x)\)가 막대로 나타납니다. 합이 항상 1로 돌아오는 것을 확인해보세요.</p>
+        </div>
+        <div class="topic-demo">
+          <div id="conditional-heatmap" class="heatmap-box"></div>
+          <div class="controls">
+            <label>X = <span id="cond-x-val">2</span> <input id="cond-x" type="range" min="0" max="4" step="1" value="2"></label>
+          </div>
+          <p class="readout" id="r-conditional"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Chain Rule -->
+    <section id="chainrule" class="topic">
+      <h2>연쇄법칙 <span class="en">Chain Rule</span></h2>
+      <p class="topic-lead">결합분포는 조건부확률의 곱으로 항상 분해할 수 있고, 그 분해 순서는 하나가 아니다. 어떤 순서를 택하든 같은 결합분포가 복원된다는 사실이 자기회귀 모델과 언어 모델의 다음 토큰 예측이 정당한 이유다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 조건부확률의 정의 \(P(y\mid x)=P(x,y)/P(x)\)를 양변에 \(P(x)\)를 곱해 뒤집으면 \(P(x,y)=P(x)P(y\mid x)\)가 된다. 변수가 \(n\)개면 이를 반복해 결합분포를 조건부확률들의 곱으로 완전히 분해할 수 있다. 이것이 연쇄법칙이다.</p>
+          <p class="interp"><strong>순서는 우리가 고른다.</strong> \(P(x,y)=P(x)P(y\mid x)\)이면서 동시에 \(P(x,y)=P(y)P(x\mid y)\)다. 두 분해는 <em>저장하는 숫자가 완전히 다르지만</em> 곱하면 같은 결합분포를 준다. \(n\)개 변수라면 \(n!\)가지 순서가 모두 유효하다. 어떤 순서도 틀리지 않으며, 다만 어떤 순서는 계산하기 쉽고 어떤 순서는 어렵다.</p>
+          <p class="interp"><strong>왜 이것이 결정적인가.</strong> 연쇄법칙은 결합분포를 \(n\)개의 <em>조건부</em> 분포로 쪼갠다. 다만 조건부확률표를 가능한 모든 문맥에 대해 그대로 저장하면 필요한 숫자의 총수는 여전히 지수적으로 크다. 언어 모델이 거대한 표를 피할 수 있는 이유는 연쇄법칙에 더해, “지금까지 본 것이 주어졌을 때 다음 하나의 분포”를 계산하는 <strong>하나의 신경망을 모든 위치와 문맥에서 공유</strong>하기 때문이다. 연쇄법칙은 정확한 분해를 제공하고, 신경망 파라미터화가 그 분해를 압축해 근사한다.</p>
+          <p class="interp"><strong>머신러닝에서: 이것이 언어 모델이다.</strong> 문장의 확률 \(P(w_1,\ldots,w_T)\)를 좌에서 우로 분해하면 \(\prod_t P(w_t\mid w_{&lt;t})\)가 된다. 학습 시 모델은 오직 "다음 토큰의 분포"만 예측하도록 훈련되는데, 연쇄법칙 덕분에 그것만으로 <strong>문장 전체의 결합분포를 표현한 것</strong>이 된다. PixelCNN, WaveNet, 자기회귀 확산 모델도 같은 뼈대이며, 축만 다를 뿐이다.</p>
+          <p class="formula">\[\begin{aligned} P(x,y) &amp;= P(x)\,P(y\mid x) = P(y)\,P(x\mid y) \\ P(x_1,\ldots,x_n) &amp;= \prod_{i=1}^{n} P(x_i \mid x_1,\ldots,x_{i-1}) \\ \log P(w_{1:T}) &amp;= \sum_{t=1}^{T} \log P(w_t \mid w_{&lt;t}) \end{aligned}\]</p>
+          <p class="hint">분해 순서 버튼을 바꿔보세요. 리드아웃에 각 분해가 실제로 저장하는 숫자들(주변분포 하나 + 조건부 표 하나)이 나타납니다 — 숫자는 다르지만 곱은 같습니다. 아래 토큰 띠를 클릭하면 자기회귀 분해가 한 토큰씩 진행되며 누적 로그확률이 쌓입니다.</p>
+        </div>
+        <div class="topic-demo">
+          <div class="controls preset-row" id="chain-order">
+            <button type="button" data-order="xy" class="active">P(X)·P(Y|X)</button>
+            <button type="button" data-order="yx">P(Y)·P(X|Y)</button>
+          </div>
+          <div id="chain-heatmap" class="heatmap-box"></div>
+          <p class="readout" id="r-chainrule"></p>
+          <p class="tensor-label">자기회귀 분해: 토큰 하나씩 조건을 늘려가며 곱한다</p>
+          <div id="chain-tokens" class="token-strip"></div>
+          <p class="readout" id="r-chain-tokens"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. Independence -->
+    <section id="independence" class="topic">
+      <h2>독립 <span class="en">Independence</span></h2>
+      <p class="topic-lead">두 변수가 독립이면 결합분포는 각 분포의 곱으로 완전히 인수분해된다. 격자 전체를 기억하는 대신 축마다의 분포만 기억하면 되므로, 독립 가정은 모델의 파라미터 수를 극적으로 줄이는 대신 표현력을 제한한다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> \(X\)와 \(Y\)가 독립이라는 것은 모든 \(x,y\)에 대해 \(P(x,y)=P(x)P(y)\)가 성립한다는 뜻이며, \(X\perp Y\)로 쓴다. 조건부로 다시 쓰면 \(P(y\mid x)=P(y)\) — <em>\(x\)를 알아도 \(y\)에 대한 믿음이 전혀 달라지지 않는다.</em></p>
+          <p class="interp"><strong>기하적으로: 격자가 외적이 된다.</strong> 독립인 결합분포는 열 벡터와 행 벡터의 외적(outer product)이다. 그래서 모든 행이 서로 상수배이고, 모든 열도 서로 상수배다. 오른쪽에서 \(t\)를 1로 보내면 격자가 정확히 그런 모양으로 정리되는 것을 볼 수 있다. 이때 주변분포는 <strong>전혀 변하지 않는다</strong> — 같은 주변분포를 갖는 결합분포가 여럿이라는 앞 절의 이야기를 눈으로 확인하는 셈이다.</p>
+          <p class="interp"><strong>대수적으로: 압축이다.</strong> 일반적인 \(K\times K\) 결합분포는 \(K^2-1\)개의 자유 파라미터를 갖지만, 독립을 가정하면 \(2(K-1)\)개로 줄어든다. \(K=5\)에서 24개가 8개가 되고, 변수가 \(n\)개면 \(K^n\)이 \(nK\)로 바뀐다. 지수가 선형이 되는 것이다. 대신 변수들 사이의 <em>모든</em> 상호작용을 표현할 수 없게 된다 — 압축에는 언제나 대가가 있다.</p>
+          <p class="interp"><strong>머신러닝에서.</strong> <strong>나이브 베이즈</strong>는 클래스가 주어지면 모든 특징이 조건부 독립이라고 가정해 \(p(x\mid y)=\prod_j p(x_j\mid y)\)로 쓴다. 명백히 틀린 가정이지만 파라미터가 극적으로 줄어 적은 데이터로도 학습되고, 분류 성능은 종종 놀랄 만큼 쓸 만하다. 데이터셋을 i.i.d.로 가정하는 것, VAE에서 잠재변수의 각 차원을 독립으로 두는 것(\(p(z)=\prod_j \mathcal{N}(z_j;0,1)\)), 확산 모델이 각 픽셀에 독립 노이즈를 더하는 것도 모두 같은 종류의 가정이다.</p>
+          <p class="formula">\[\begin{aligned} X \perp Y \iff P(x,y) &amp;= P(x)\,P(y) \quad \forall x,y \\ \iff P(y\mid x) &amp;= P(y) \\ \text{파라미터 수}:\quad K^2-1 &amp;\;\longrightarrow\; 2(K-1) \end{aligned}\]</p>
+          <p class="hint">t 슬라이더를 0에서 1로 옮기거나 "독립으로 보내기"를 눌러보세요. 위 격자는 주변분포의 외적으로 수렴하고, 아래 잔차 격자 \(P(x,y)-P(x)P(y)\)는 모두 0으로 사라집니다. 잔차가 0이 아니면 두 주변분포만으로는 결합분포를 복원할 수 없다는 뜻입니다.</p>
+        </div>
+        <div class="topic-demo">
+          <div id="indep-heatmap" class="heatmap-box"></div>
+          <div class="controls">
+            <label>t = <span id="indep-t-val">0.00</span> <input id="indep-t" type="range" min="0" max="1" step="0.01" value="0"></label>
+            <button type="button" id="indep-play">독립으로 보내기</button>
+          </div>
+          <p class="tensor-label">잔차 P(x,y) − P(x)P(y): 0이 되면 독립</p>
+          <div id="indep-residual" class="heatmap-box"></div>
+          <p class="readout" id="r-independence"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. Expectation -->
+    <section id="expectation" class="topic">
+      <h2>기대값 <span class="en">Expectation</span></h2>
+      <p class="topic-lead">기대값은 분포를 하나의 대표값으로 요약한다. 표본을 늘릴수록 표본평균이 기대값으로 수렴한다는 성질 덕분에, 적분으로는 계산할 수 없는 기대손실과 기대보상을 미니배치 평균으로 대신할 수 있다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 함수 \(f\)의 기대값은 \(f(x)\)를 확률로 가중평균한 값이다: 이산이면 \(\mathbb{E}[f(X)]=\sum_x P(x)f(x)\), 연속이면 \(\mathbb{E}[f(X)]=\int p(x)f(x)\,dx\). \(f(x)=x\)인 경우가 흔히 말하는 평균 \(\mu\)다.</p>
+          <p class="interp"><strong>기하적으로: 무게중심.</strong> 밀도 곡선을 두께 없는 판자의 질량 분포라고 보면, 기대값은 그 판자가 균형을 이루는 받침점의 위치다. 그래서 기대값은 <em>분포가 실제로 취하는 값일 필요가 없다</em>. 주사위 눈의 기대값 3.5는 주사위에 없는 값이고, 이진 레이블의 기대값 0.7도 레이블이 될 수 없는 값이다.</p>
+          <p class="interp"><strong>선형성 — 가장 많이 쓰이는 성질.</strong> \(\mathbb{E}[aX+bY]=a\mathbb{E}[X]+b\mathbb{E}[Y]\)는 \(X\)와 \(Y\)가 독립이 아니어도 언제나 성립한다. 이 성질 덕분에 손실의 합의 기대값을 항별로 쪼갤 수 있다. 또한 함수가 충분히 매끄럽고 적분과 미분을 교환할 수 있는 조건에서는 \(\nabla_\theta\mathbb{E}[f_\theta(X)]=\mathbb{E}[\nabla_\theta f_\theta(X)]\)로 쓸 수 있다. 반면 \(\mathbb{E}[XY]=\mathbb{E}[X]\mathbb{E}[Y]\)는 <em>독립일 때만</em> 성립하며, 그 차이가 곧 다다음 절의 공분산이다.</p>
+          <p class="interp"><strong>머신러닝에서.</strong> 학습이 최소화하려는 대상은 하나의 예제에 대한 손실이 아니라 <strong>기대손실</strong> \(\mathbb{E}_{(x,y)\sim p_{\text{data}}}[\ell(f(x),y)]\)이다. 강화학습의 목표는 <strong>기대보상</strong> \(\mathbb{E}_\pi[\sum_t \gamma^t r_t]\)이다. 둘 다 참 분포를 모르므로 적분을 직접 할 수 없고, 대신 표본평균으로 추정한다 — 큰 수의 법칙이 그 대체를 정당화한다.</p>
+          <p class="formula">\[\begin{aligned} \mathbb{E}[f(X)] &amp;= \sum_x P(x) f(x) = \int p(x) f(x)\,dx \\ \mathbb{E}[aX+bY] &amp;= a\,\mathbb{E}[X] + b\,\mathbb{E}[Y] \quad \text{(항상)} \\ \bar{x}_N = \frac{1}{N}\sum_{i} x^{(i)} &amp;\;\xrightarrow[N\to\infty]{}\; \mathbb{E}[X] \quad \text{(큰 수의 법칙)} \end{aligned}\]</p>
+          <p class="hint">"표본 뽑기"를 눌러보세요. 위 그림에는 표본이 눈금으로 쌓이고, 아래 그림에는 누적 표본평균이 참 기대값(주황 점선)으로 수렴하는 궤적이 그려집니다. 초반에 크게 출렁이다가 점점 안정되는 모습이 미니배치 gradient의 잡음과 같은 현상입니다.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-expectation" width="640" height="320"></canvas>
+          <div class="controls">
+            <button type="button" id="exp-play">표본 뽑기</button>
+            <button type="button" id="exp-reset">초기화</button>
+          </div>
+          <p class="tensor-label">표본평균의 수렴: 표본 수가 늘수록 E[X]에 가까워진다</p>
+          <canvas id="c-expectation-lln" width="640" height="260"></canvas>
+          <p class="readout" id="r-expectation"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10. Variance -->
+    <section id="variance" class="topic">
+      <h2>분산 <span class="en">Variance</span></h2>
+      <p class="topic-lead">평균이 같아도 분포의 모양은 전혀 다를 수 있다. 분산은 값들이 평균에서 얼마나 흩어져 있는지를 재며, 예측의 불확실성과 추정량의 안정성, 최적화 과정의 잡음이 모두 이 양으로 표현된다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 분산은 평균으로부터의 제곱편차의 기대값이다: \(\mathrm{Var}(X)=\mathbb{E}[(X-\mu)^2]\). 전개하면 계산에 편리한 형태 \(\mathbb{E}[X^2]-\mathbb{E}[X]^2\)가 된다. 제곱을 썼으므로 단위가 원래 값의 제곱이 되는데, 이를 되돌린 것이 표준편차 \(\sigma=\sqrt{\mathrm{Var}(X)}\)다.</p>
+          <p class="interp"><strong>왜 제곱인가.</strong> 그냥 편차 \(X-\mu\)의 기대값은 정의상 항상 0이다 — 양쪽이 상쇄된다. 상쇄를 막으려면 부호를 없애야 하는데, 절댓값 대신 제곱을 쓰는 이유는 미분 가능하고 계산이 닫힌 형태로 떨어지기 때문이다. 절댓값을 택하면 평균절대편차가 되며, 그 선택이 나중에 MAE와 라플라스 분포로 이어진다.</p>
+          <p class="interp"><strong>기하적으로.</strong> 오른쪽 두 곡선은 평균이 같고 분산만 다르다. 분산이 작으면 봉우리가 높고 좁으며, 크면 낮고 넓게 퍼진다. 전체 면적은 언제나 1이므로 폭과 높이는 맞바꿀 수밖에 없다. \(\pm\sigma\) 표시가 그 폭을 직접 보여준다.</p>
+          <p class="interp"><strong>왜 평균을 내면 흔들림이 줄어드는가.</strong> 위 식의 마지막 줄 \(\mathrm{Var}(\bar{x}_N)=\mathrm{Var}(X)/N\)이 이 글에서 가장 자주 재사용되는 사실이다. 이유는 두 줄이면 끝난다. 스칼라배 규칙 \(\mathrm{Var}(aX)=a^2\mathrm{Var}(X)\)에서 \(\bar{x}_N=\frac{1}{N}\sum_i x^{(i)}\)의 앞 계수 \(1/N\)은 제곱되어 \(1/N^2\)로 나오고, 표본이 독립이면 합의 분산은 그냥 더해져 \(N\cdot\mathrm{Var}(X)\)가 된다. 둘을 곱하면 \(\frac{1}{N^2}\cdot N\,\mathrm{Var}(X)=\mathrm{Var}(X)/N\)이다. <em>직관적으로는</em> 표본 하나하나의 오차가 제각각 다른 방향을 향해 서로 부분적으로 상쇄되기 때문이다 — 모두 같은 방향으로 틀렸다면(완전 상관) 상쇄가 일어나지 않아 이 이득은 사라진다.</p>
+          <p class="interp"><strong>그래서 √N이 등장한다.</strong> 분산이 \(1/N\)로 줄면 표준편차는 그 제곱근인 \(1/\sqrt{N}\)로 줄어든다. 우리가 체감하는 오차는 분산이 아니라 표준편차이므로, <strong>정밀도를 10배 올리려면 표본이 100배 필요하다</strong>는 앞 절 샘플링의 결론이 여기서 유도된다. 미니배치 크기를 4배로 키워도 gradient 잡음은 4배가 아니라 2배만 줄어드는 것, 그래서 배치를 키우는 데 수확 체감이 있는 것도 같은 \(\sqrt{N}\) 때문이다.</p>
+          <p class="interp"><strong>머신러닝에서: 세 가지 얼굴.</strong> 첫째, 모델이 출력하는 <strong>예측 불확실성</strong>이다 — 가우시안 출력의 \(\sigma\)를 함께 학습하면 "얼마나 확신하는가"를 말할 수 있다. 둘째, <strong>추정량의 분산</strong>이다 — 편향-분산 분해에서 과적합은 분산이 큰 상태다. 셋째, <strong>최적화의 잡음</strong>이다 — 미니배치 gradient는 참 gradient의 불편추정량이지만 분산을 가지며, 배치 크기를 \(B\)배 키우면 그 분산이 대략 \(1/B\)로 준다. 학습률과 배치 크기를 함께 조정해야 하는 이유가 여기에 있다.</p>
+          <p class="formula">\[\begin{aligned} \mathrm{Var}(X) &amp;= \mathbb{E}[(X-\mu)^2] = \mathbb{E}[X^2]-\mathbb{E}[X]^2 \\ \sigma &amp;= \sqrt{\mathrm{Var}(X)} \\ \mathrm{Var}(aX+b) &amp;= a^2\,\mathrm{Var}(X) \\ \mathrm{Var}(\bar{x}_N) &amp;= \mathrm{Var}(X)/N \end{aligned}\]</p>
+          <p class="hint">두 σ 슬라이더를 움직여보세요. 평균은 0으로 고정되어 있으니 오직 퍼짐만 달라집니다. 한쪽을 아주 작게, 다른 쪽을 아주 크게 만들면 "같은 평균, 다른 분포"가 얼마나 다른 이야기를 하는지 분명해집니다.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-variance" width="640" height="380"></canvas>
+          <div class="controls">
+            <label>σ₁ = <span id="var-s1-val">0.6</span> <input id="var-s1" type="range" min="0.2" max="2.5" step="0.05" value="0.6"></label>
+            <label>σ₂ = <span id="var-s2-val">1.2</span> <input id="var-s2" type="range" min="0.2" max="2.5" step="0.05" value="1.2"></label>
+          </div>
+          <p class="readout" id="r-variance"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11. Covariance & Correlation -->
+    <section id="covariance" class="topic">
+      <h2>공분산 · 상관 <span class="en">Covariance &amp; Correlation</span></h2>
+      <p class="topic-lead">공분산은 두 변수가 함께 움직이는 방향과 크기를 담고, 상관계수는 거기서 크기를 걷어내 방향만 남긴다. 공분산행렬이 그리는 타원의 축이 곧 고유벡터이며, 이것이 PCA가 하는 일이다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 공분산은 두 변수의 편차를 곱해 평균한 값이다: \(\mathrm{Cov}(X,Y)=\mathbb{E}[(X-\mu_X)(Y-\mu_Y)]=\mathbb{E}[XY]-\mathbb{E}[X]\mathbb{E}[Y]\). 두 번째 형태가 말해주듯, 공분산은 <em>\(\mathbb{E}[XY]=\mathbb{E}[X]\mathbb{E}[Y]\)가 얼마나 깨지는가</em>를 재는 양이다 — 앞 절에서 미뤄둔 바로 그 차이다.</p>
+          <p class="definition"><strong>정의 (상관계수).</strong> 공분산은 단위에 의존한다. 키를 cm에서 m로 바꾸면 값이 100배 달라진다. 각자의 표준편차로 나눠 이 의존성을 제거한 것이 상관계수 \(\rho=\mathrm{Cov}(X,Y)/(\sigma_X\sigma_Y)\)이며, 언제나 \(-1\le\rho\le 1\)이다.</p>
+          <p class="interp"><strong>기하적으로: 타원의 축이 고유벡터다.</strong> 2차원 가우시안의 등고선은 타원이고, 그 타원의 모양은 공분산행렬 \(\Sigma\)가 결정한다. \(\Sigma\)를 고유분해하면 <strong>고유벡터가 타원의 주축 방향</strong>, <strong>고유값이 그 방향의 분산</strong>이다. \(\rho\)를 키우면 타원이 기울고, 0으로 되돌리면 축이 좌표축과 정렬된다. 이것이 정확히 <a href="../2026-07-14-linear-algebra/ko.html#eigen">PCA</a>가 하는 일이다 — 데이터가 가장 크게 퍼진 방향을 찾는 것은 공분산행렬의 최대 고유벡터를 찾는 것과 같은 문제다.</p>
+          <p class="interp"><strong>상관 0이 독립은 아니다.</strong> 독립이면 상관은 0이지만, 역은 성립하지 않는다. \(X\sim\mathcal{N}(0,1)\)이고 \(Y=X^2\)이면 \(Y\)는 \(X\)에 완전히 종속인데도 \(\mathrm{Cov}(X,Y)=\mathbb{E}[X^3]=0\)이다. 상관계수는 <em>선형</em> 관계만 잡아내기 때문이다. 표현학습에서 "특징이 decorrelate되었다"가 "독립이다"를 뜻하지 않는 이유가 이것이다.</p>
+          <p class="interp"><strong>머신러닝에서.</strong> 다변량 가우시안 \(\mathcal{N}(\mu,\Sigma)\)의 모양 전체가 \(\Sigma\)에 담긴다. PCA는 \(\Sigma\)의 고유벡터로 좌표계를 갈아타 차원을 줄이고, whitening은 \(\Sigma\)를 단위행렬로 만든다. 대조학습에서 표현 붕괴를 막기 위해 특징 간 공분산을 규제하는 기법들(Barlow Twins, VICReg)도 이 행렬을 직접 다룬다.</p>
+          <p class="formula">\[\begin{aligned} \mathrm{Cov}(X,Y) &amp;= \mathbb{E}[XY]-\mathbb{E}[X]\mathbb{E}[Y] \\ \rho &amp;= \frac{\mathrm{Cov}(X,Y)}{\sigma_X \sigma_Y} \in [-1, 1] \\ \Sigma &amp;= \begin{pmatrix} \sigma_X^2 &amp; \rho\sigma_X\sigma_Y \\ \rho\sigma_X\sigma_Y &amp; \sigma_Y^2 \end{pmatrix} = Q\Lambda Q^\top \end{aligned}\]</p>
+          <p class="hint">ρ 슬라이더를 −0.95에서 0.95까지 움직여보세요. 점구름과 등고선 타원이 함께 기울고, 빨강·보라 축(고유벡터)이 그 방향을 따라갑니다. ρ=0으로 두고 σx, σy만 바꾸면 축이 좌표축에 붙은 채 타원의 비율만 달라집니다.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-covariance" width="640" height="440"></canvas>
+          <div class="controls">
+            <label>σx = <span id="cov-sx-val">1.4</span> <input id="cov-sx" type="range" min="0.3" max="2.5" step="0.05" value="1.4"></label>
+            <label>σy = <span id="cov-sy-val">0.7</span> <input id="cov-sy" type="range" min="0.3" max="2.5" step="0.05" value="0.7"></label>
+            <label>ρ = <span id="cov-rho-val">0.60</span> <input id="cov-rho" type="range" min="-0.95" max="0.95" step="0.01" value="0.6"></label>
+          </div>
+          <p class="readout" id="r-covariance"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12. Categorical -->
+    <section id="categorical" class="topic">
+      <h2>카테고리 분포 <span class="en">Categorical Distribution</span></h2>
+      <p class="topic-lead">유한한 선택지 위의 분포는 확률벡터 하나로 결정되고, 그 벡터가 놓일 수 있는 공간은 합이 1인 심플렉스다. 소프트맥스는 신경망이 뱉은 임의의 logit 벡터를 그 심플렉스 위로 옮기는 사상이며, 분류와 토큰 예측이 모두 여기서 일어난다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> \(K\)개의 값을 갖는 확률변수의 분포는 확률벡터 \(\boldsymbol{p}=(p_1,\ldots,p_K)\) 하나로 결정된다. 조건은 \(p_k\ge 0\)과 \(\sum_k p_k=1\)이다. \(K=2\)인 특수한 경우가 베르누이 분포이며, 동전 던지기와 이진 분류가 여기에 해당한다.</p>
+          <p class="interp"><strong>기하적으로: 심플렉스.</strong> 두 조건을 만족하는 점들의 집합은 \(K\)차원 공간에 놓인 \((K-1)\)차원 도형이다. \(K=3\)이면 세 꼭짓점을 잇는 삼각형이 되는데, 이를 확률 심플렉스라 부른다. 꼭짓점은 one-hot 분포(확신), 정중앙은 균등분포(완전한 무지)다. 모델이 출력하는 확률벡터는 언제나 이 도형 <em>위</em>에 있어야 하며, 자유도는 \(K\)가 아니라 \(K-1\)이다.</p>
+          <p class="interp"><strong>소프트맥스: 심플렉스로 옮기는 사상.</strong> 신경망의 마지막 층은 제약 없는 실수 벡터(logit) \(\boldsymbol{z}\)를 뱉는다. 소프트맥스 \(p_k=e^{z_k}/\sum_j e^{z_j}\)는 이를 심플렉스 위로 옮긴다. 하는 일은 두 단계다 — \(\exp\)로 모든 성분을 양수로 만들고, 그 합(<a href="../2026-07-14-linear-algebra/ko.html#norm">L1 노름</a>)으로 나눠 총합을 1로 맞춘다. \(\boldsymbol{z}\)에 상수를 더해도 결과가 같다는 점(이동 불변성)이 자유도가 \(K-1\)이라는 사실과 정확히 대응한다.</p>
+          <p class="interp"><strong>온도.</strong> \(p_k \propto \exp(z_k/T)\)에서 \(T\)는 분포의 뾰족함을 조절한다. \(T\to 0\)이면 argmax 하나에 확률이 몰려 one-hot이 되고(greedy 디코딩), \(T\to\infty\)면 균등분포로 평평해진다. 언어 모델의 생성 다양성을 조절하는 손잡이가 바로 이것이다.</p>
+          <p class="interp"><strong>손실함수와의 연결.</strong> 정답이 클래스 \(c\)일 때 이 분포의 음의 로그가능도는 \(-\log p_c\)다. 이것이 그대로 <strong>크로스엔트로피 손실</strong>이다 — 원-핫 정답 \(y\)에 대해 \(-\sum_k y_k \log p_k = -\log p_c\)이기 때문이다. 즉 분류 모델을 학습한다는 것은 카테고리 분포의 MLE를 푸는 일이다. 어휘 전체를 클래스로 두면 그대로 언어 모델의 다음 토큰 예측이 된다.</p>
+          <p class="formula">\[\begin{aligned} P(Y=k) &amp;= p_k, \quad p_k \ge 0, \quad \textstyle\sum_{k} p_k = 1 \\ p_k &amp;= \mathrm{softmax}(\boldsymbol{z}/T)_k = \frac{e^{z_k/T}}{\sum_j e^{z_j/T}} \\ -\log P(Y=c) &amp;= -\log p_c \quad \text{(크로스엔트로피)} \end{aligned}\]</p>
+          <p class="hint">온도 T를 0.1까지 낮춰보세요 — 확률이 한 클래스로 몰립니다. 3까지 올리면 다섯 클래스가 거의 균등해집니다. logit은 그대로인데 분포만 달라진다는 점, 그리고 합은 언제나 1이라는 점을 확인해보세요.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-categorical" width="640" height="400"></canvas>
+          <div class="controls">
+            <label>온도 T = <span id="cat-temp-val">1.00</span> <input id="cat-temp" type="range" min="0.1" max="3" step="0.05" value="1"></label>
+          </div>
+          <p class="readout" id="r-categorical"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 13. Gaussian -->
+    <section id="gaussian" class="topic">
+      <h2>가우시안 분포 <span class="en">Gaussian Distribution</span></h2>
+      <p class="topic-lead">평균과 분산 두 개의 파라미터만으로 결정되며, 여러 요인이 더해질 때 자연스럽게 나타난다. 회귀에서 MSE를 쓰는 것은 잡음이 가우시안이라고 가정하는 것과 정확히 같은 말이다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 평균 \(\mu\)와 분산 \(\sigma^2\)를 갖는 가우시안(정규) 분포의 밀도는 \(p(x)=\frac{1}{\sqrt{2\pi\sigma^2}}\exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)\)이다. 두 개의 수만으로 분포 전체가 결정되며, 앞의 계수는 적분이 1이 되도록 맞추는 정규화 상수일 뿐 모양에는 관여하지 않는다.</p>
+          <p class="interp"><strong>왜 하필 이 분포인가.</strong> 두 가지 이유가 있다. 첫째, <strong>중심극한정리</strong> — 독립인 확률변수를 여럿 더하면 각자의 분포가 무엇이었든 합은 가우시안에 가까워진다. 측정 잡음처럼 수많은 작은 요인이 누적된 양이 가우시안을 따르는 경향이 있는 이유다. 둘째, <strong>최대 엔트로피</strong> — 평균과 분산만 알고 그 외에는 아무것도 모를 때, 가장 적은 가정을 담은 분포가 가우시안이다. 모르는 것을 억지로 지어내지 않는 선택인 셈이다.</p>
+          <p class="interp"><strong>기하적으로.</strong> \(\mu\)는 봉우리의 위치를, \(\sigma\)는 폭을 정한다. \(\mu\)를 바꾸면 모양은 그대로 좌우로 미끄러지고, \(\sigma\)를 바꾸면 위치는 그대로 넓어지거나 좁아진다. 어느 \(\mu,\sigma\)에서도 \(\pm 1\sigma\) 안에 약 68%, \(\pm 2\sigma\) 안에 약 95%가 들어간다 — 오른쪽 그림의 두 겹 음영이 그것이다.</p>
+          <p class="interp"><strong>MSE는 가우시안 가정이다.</strong> 회귀에서 \(y=f(x)+\varepsilon\), \(\varepsilon\sim\mathcal{N}(0,\sigma^2)\)를 가정하면 \(p(y\mid x)=\mathcal{N}(y; f(x), \sigma^2)\)이다. 여기에 음의 로그를 취하면 지수 안의 제곱이 그대로 내려와 \(-\log p(y\mid x)=\frac{(y-f(x))^2}{2\sigma^2}+\text{const}\)가 된다. <strong>\(\sigma\)가 고정이면 이것은 상수배를 제외하고 MSE와 완전히 같다.</strong> 우리가 평균제곱오차를 쓸 때, 우리는 잡음이 가우시안이라고 말하고 있는 것이다.</p>
+          <p class="interp"><strong>머신러닝에서.</strong> VAE의 잠재 사전분포는 \(\mathcal{N}(0,I)\)이고, 인코더는 \(\mathcal{N}(\mu(x),\sigma(x)^2)\)를 출력한다. 확산 모델은 데이터에 가우시안 노이즈를 점진적으로 더했다가 되돌리는 과정 자체이며, 각 단계의 전이분포가 가우시안이라는 점이 학습을 닫힌 형태로 만들어준다. 가중치 초기화, 드롭아웃의 대안인 가우시안 노이즈, 베이즈 신경망의 근사 사후분포도 모두 여기서 나온다.</p>
+          <p class="formula">\[\begin{aligned} p(x) &amp;= \frac{1}{\sqrt{2\pi\sigma^2}}\exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right) \\ -\log p(x) &amp;= \frac{(x-\mu)^2}{2\sigma^2} + \tfrac{1}{2}\log(2\pi\sigma^2) \\ \text{MSE} &amp;\;\equiv\; \text{가우시안 NLL} \;(\sigma \text{ 고정}) \end{aligned}\]</p>
+          <p class="hint">μ와 σ를 움직여보세요. 음영이 ±1σ(68%)와 ±2σ(95%) 구간이며, σ가 커져도 그 비율은 변하지 않습니다. "표본 뽑기"로 실제 표본이 이 구간에 어떤 비율로 떨어지는지 눈금으로 확인해보세요.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-gaussian" width="640" height="380"></canvas>
+          <div class="controls">
+            <label>μ = <span id="gauss-mu-val">0.00</span> <input id="gauss-mu" type="range" min="-3" max="3" step="0.05" value="0"></label>
+            <label>σ = <span id="gauss-sigma-val">1.00</span> <input id="gauss-sigma" type="range" min="0.2" max="2.5" step="0.05" value="1"></label>
+            <button type="button" id="gauss-sample">표본 뽑기</button>
+          </div>
+          <p class="readout" id="r-gaussian"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 14. Laplace -->
+    <section id="laplace" class="topic">
+      <h2>라플라스 분포 <span class="en">Laplace Distribution</span></h2>
+      <p class="topic-lead">가우시안과 같은 자리에 중심을 두지만 꼬리가 두껍고 봉우리가 뾰족하다. 이 차이 하나가 손실함수 관점에서는 MSE의 포물선과 MAE의 V자라는 형태 차이로 그대로 나타난다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 위치 \(\mu\)와 척도 \(b\)를 갖는 라플라스 분포의 밀도는 \(p(x)=\frac{1}{2b}\exp\!\left(-\frac{|x-\mu|}{b}\right)\)이다. 가우시안과 나란히 놓으면 차이는 지수 안 딱 한 곳뿐이다 — <strong>제곱이 절댓값으로 바뀌었다.</strong> 분산은 \(2b^2\)이다.</p>
+          <p class="interp"><strong>기하적으로: 뾰족한 봉우리, 두꺼운 꼬리.</strong> 오른쪽 그림은 두 분포의 <em>분산을 같게 맞춰</em> 겹쳐 그린 것이라, 폭이 아니라 모양만 비교된다. 라플라스는 중심에서 미분 불가능한 뾰족한 꼭짓점을 갖고, 대신 양쪽 꼬리가 더 천천히 줄어든다. "로그 스케일로 꼬리 보기"를 켜면 가우시안이 포물선으로(제곱만큼 빠르게) 떨어지는 동안 라플라스는 직선으로(절댓값만큼 느리게) 떨어지는 것이 분명해진다.</p>
+          <p class="interp"><strong>꼬리가 두껍다는 것의 의미.</strong> 가우시안 아래에서 \(5\sigma\) 떨어진 관측은 사실상 불가능한 사건이라 모델이 그것을 설명하려고 평균을 크게 끌어당긴다. 라플라스 아래에서는 같은 관측이 "드물지만 있을 법한 일"이라 훨씬 덜 흔들린다. <strong>이상치에 대한 강건성은 꼬리의 두께에서 나온다.</strong></p>
+          <p class="interp"><strong>MAE는 라플라스 가정이다.</strong> 앞 절과 같은 계산을 반복하면 된다. \(-\log p(x)=\frac{|x-\mu|}{b}+\log 2b\)이므로, 상수배를 제외하면 <strong>평균절대오차(MAE, L1 손실)</strong>다. 회귀 손실을 MSE에서 MAE로 바꾸는 것은 하이퍼파라미터를 손보는 일이 아니라 <em>잡음 모델을 가우시안에서 라플라스로 교체하는 일</em>이다.</p>
+          <p class="interp"><strong>머신러닝에서.</strong> 이상치가 섞인 회귀에서 MAE와 Huber 손실이 쓰이는 것이 첫 번째 쓰임이고, 두 번째는 희소성이다. 파라미터에 라플라스 <em>사전분포</em>를 두면 페널티가 \(\lambda|w|\), 즉 <strong>L1 정규화(Lasso)</strong>가 되며, 뾰족한 꼭짓점 때문에 해가 정확히 0이 되는 성질이 생긴다. 이 이야기는 마지막 절에서 직접 확인한다.</p>
+          <p class="formula">\[\begin{aligned} p(x) &amp;= \frac{1}{2b}\exp\!\left(-\frac{|x-\mu|}{b}\right), \quad \mathrm{Var}(X) = 2b^2 \\ -\log p(x) &amp;= \frac{|x-\mu|}{b} + \log 2b \\ \text{MSE} \leftrightarrow \text{가우시안}, &amp;\qquad \text{MAE} \leftrightarrow \text{라플라스} \end{aligned}\]</p>
+          <p class="hint">b를 움직이며 두 곡선을 비교해보세요 — 분산은 항상 같게 맞춰져 있으니 달라지는 것은 모양뿐입니다. 아래 그림이 핵심입니다: −log p를 그리면 가우시안은 <strong>포물선(MSE)</strong>, 라플라스는 <strong>V자(MAE)</strong>가 됩니다. 두 손실함수의 정체가 두 분포였던 셈입니다.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-laplace" width="640" height="340"></canvas>
+          <div class="controls">
+            <label>척도 b = <span id="lap-b-val">1.00</span> <input id="lap-b" type="range" min="0.2" max="2.5" step="0.05" value="1"></label>
+            <button type="button" id="lap-log" class="toggle">로그 스케일로 꼬리 보기</button>
+          </div>
+          <p class="tensor-label">손실 관점: −log p(x). 가우시안은 포물선(MSE), 라플라스는 V자(MAE)</p>
+          <canvas id="c-laplace-loss" width="640" height="300"></canvas>
+          <p class="readout" id="r-laplace"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 15. Likelihood -->
+    <section id="likelihood" class="topic">
+      <h2>가능도 <span class="en">Likelihood</span></h2>
+      <p class="topic-lead">같은 식을 데이터의 함수로 보면 확률이고, 파라미터의 함수로 보면 가능도다. 관측된 데이터를 가장 그럴듯하게 만드는 파라미터를 고르는 것이 최대가능도 추정이며, 대부분의 학습이 여기에 해당한다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> \(p(x\mid\theta)\)라는 하나의 식을, \(\theta\)를 고정하고 \(x\)의 함수로 보면 <em>확률(밀도)</em>이고, \(x\)를 고정하고 \(\theta\)의 함수로 보면 <em>가능도</em> \(L(\theta)=p(x\mid\theta)\)다. 식은 같고 무엇을 변수로 보느냐만 다르다.</p>
+          <p class="interp"><strong>가능도는 분포가 아니다.</strong> 이것이 핵심적인 구분이다. \(\int p(x\mid\theta)\,dx=1\)은 성립하지만 \(\int L(\theta)\,d\theta\)는 1일 이유가 전혀 없다. 오른쪽 아래 곡선의 넓이가 1이 아닌 것이 그 때문이다. 가능도는 \(\theta\)들 사이의 <em>상대적 선호</em>를 나타내는 점수일 뿐, \(\theta\)에 대한 확률분포가 아니다. \(\theta\)에 진짜 확률을 부여하려면 사전분포가 필요하고, 그것이 두 절 뒤의 베이즈다.</p>
+          <p class="interp"><strong>데이터가 여럿일 때.</strong> 관측이 i.i.d.라면 결합가능도는 각각의 곱이다: \(L(\theta)=\prod_i p(x^{(i)}\mid\theta)\). 이 곱을 최대로 만드는 \(\theta\)를 고르는 것이 <strong>최대가능도 추정(MLE)</strong>이다. "관측된 데이터를 가장 그럴듯하게 만드는 설명을 고른다"는 원리이며, 지도학습·언어 모델·생성 모델의 학습이 거의 모두 이 형태다.</p>
+          <p class="interp"><strong>가우시안의 경우: 답이 표본평균이다.</strong> \(p(x\mid\mu)=\mathcal{N}(x;\mu,\sigma^2)\)에서 \(\log L(\mu)=-\frac{1}{2\sigma^2}\sum_i (x^{(i)}-\mu)^2+\text{const}\)이므로, \(\mu\)로 미분해 0으로 두면 \(\hat\mu=\frac{1}{N}\sum_i x^{(i)}\)이 나온다. 평균을 "당연히 평균이니까" 쓰는 것이 아니라, <em>가우시안 가정 아래 MLE 해가 평균이기 때문에</em> 쓰는 것이다. 잡음 모델을 라플라스로 바꾸면 같은 계산의 답이 중앙값이 된다.</p>
+          <p class="interp"><strong>MLE가 답하는 질문.</strong> MLE는 “지금 관측한 데이터가 가장 그럴듯해지려면 파라미터를 무엇으로 두어야 하는가?”를 묻는다. 오직 가능도만 비교하므로 데이터를 보기 전의 지식이나 선호는 사용하지 않는다. 데이터가 충분하면 강력하고 단순하지만, 데이터가 적거나 파라미터가 많으면 관측된 표본에 지나치게 맞출 수 있다.</p>
+          <p class="formula">\[\begin{aligned} L(\theta) &amp;= p(x \mid \theta) \quad \text{(} x \text{ 고정, } \theta \text{ 의 함수)} \\ L(\theta) &amp;= \prod_{i=1}^{N} p(x^{(i)} \mid \theta) \quad \text{(i.i.d.)} \\ \hat{\theta}_{\text{MLE}} &amp;= \arg\max_{\theta} L(\theta) \end{aligned}\]</p>
+          <p class="hint">위 그림을 클릭해 데이터 점을 추가해보세요. 아래 가능도 곡선 \(L(\mu)\)가 실시간으로 바뀌고, 최대점(초록 선)이 언제나 데이터의 <strong>표본평균</strong>에 정확히 놓입니다. 한쪽에 점을 몰아 찍으면 곡선이 그쪽으로 끌려가는 것을 볼 수 있습니다.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-likelihood" width="640" height="320"></canvas>
+          <p class="tensor-label">파라미터 μ에 대한 가능도 곡선 L(μ) — 최대점이 MLE 해</p>
+          <canvas id="c-likelihood-curve" width="640" height="300"></canvas>
+          <p class="readout" id="r-likelihood"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 16. 최대가능도 추정 (MLE) -->
+    <section id="mle" class="topic">
+      <h2>최대가능도 추정 <span class="en">Maximum Likelihood Estimation</span></h2>
+      <p class="topic-lead">가능도가 파라미터에 매기는 점수라면, 그 점수를 가장 높게 받는 파라미터를 답으로 채택하는 것이 최대가능도 추정이다. 분포족을 무엇으로 고르느냐에 따라 같은 원리에서 표본평균·중앙값·상대빈도라는 서로 다른 추정량이 나온다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 관측 데이터 \(\mathcal{D}=\{x^{(1)},\ldots,x^{(N)}\}\)와 파라미터 \(\theta\)로 지정되는 모델 \(p(x\mid\theta)\)가 주어졌을 때, <strong>최대가능도 추정량(MLE)</strong>은 가능도를 최대로 만드는 파라미터다: \(\hat\theta_{\text{MLE}}=\arg\max_{\theta\in\Theta}L(\theta)\), 여기서 \(L(\theta)=p(\mathcal{D}\mid\theta)\)다. 관측이 i.i.d.이면 \(L(\theta)=\prod_i p(x^{(i)}\mid\theta)\)이고, \(\log\)가 순증가 함수이므로 <em>같은 \(\hat\theta\)</em>를 로그가능도 \(\ell(\theta)=\sum_i \log p(x^{(i)}\mid\theta)\)의 최대점으로 구해도 된다.</p>
+          <p class="interp"><strong>무엇을 고정하고 무엇을 움직이는가.</strong> 앞 절의 구분이 여기서 실제로 쓰인다. 데이터 \(\mathcal{D}\)는 이미 관측되어 <em>고정된 상수</em>이고, 움직이는 것은 오직 \(\theta\)다. 그래서 MLE는 "데이터가 어떻게 나올까"를 묻는 것이 아니라 <strong>"이미 나온 이 데이터를 가장 덜 놀랍게 만드는 설명은 무엇인가"</strong>를 묻는다. 여러 후보 \(\theta\)에게 같은 데이터를 보여주고 "너의 세계관에서 이 데이터가 나올 확률은 얼마냐"고 물어, 가장 큰 값을 부른 후보를 채택하는 것이다.</p>
+          <p class="interp"><strong>계산 절차.</strong> 실제로는 거의 언제나 같은 네 단계를 밟는다. ① 분포족 \(p(x\mid\theta)\)를 고른다(이것이 <em>가정</em>이며, 뒤의 답을 전부 결정한다). ② 로그가능도 \(\ell(\theta)=\sum_i\log p(x^{(i)}\mid\theta)\)를 적는다. ③ \(\nabla_\theta\ell=0\)을 푼다(이 방정식을 가능도방정식이라 한다). ④ 그 해가 최대점인지 2차 조건이나 함수의 오목성으로 확인한다. 닫힌 해가 없으면 ③을 경사하강법으로 대신하는데, <em>그것이 바로 신경망 학습이다</em>.</p>
+          <p class="interp"><strong>세 가지 표준 예제.</strong> 같은 절차에서 우리가 이미 아는 통계량들이 튀어나온다. <strong>베르누이</strong> \(p(x\mid\theta)=\theta^x(1-\theta)^{1-x}\)에서는 \(\ell'(\theta)=0\)이 \(\hat\theta=\frac{1}{N}\sum_i x^{(i)}\), 즉 <em>관측된 상대빈도</em>를 준다 — 동전을 10번 던져 앞면이 7번 나왔다면 MLE는 0.7이다. <strong>가우시안</strong>에서는 \(\hat\mu\)가 <em>표본평균</em>, \(\hat\sigma^2=\frac{1}{N}\sum_i(x^{(i)}-\hat\mu)^2\)가 <em>표본분산</em>이다. <strong>라플라스</strong>에서는 \(\sum_i|x^{(i)}-\mu|\)를 최소화해야 하므로 답이 <em>중앙값</em>이 된다. 우리가 "당연한 요약값"이라 여기던 것들이 사실은 특정 분포 가정 아래의 MLE 해였던 셈이다.</p>
+          <p class="interp"><strong>직관: 분포족을 고르는 것이 추정량을 고르는 것이다.</strong> 위 세 결과의 차이는 데이터가 아니라 <em>가정</em>에서 온다. 가우시안은 제곱오차를 벌하므로 멀리 떨어진 점 하나가 \((x-\mu)^2\)만큼 크게 항의하고, 평균은 그쪽으로 끌려간다. 라플라스는 절댓값만 벌하므로 아무리 멀어도 항의의 세기가 일정하고, 중앙값은 꿈쩍하지 않는다. 오른쪽에서 이상치를 하나 끌어보면 두 추정값이 갈라지는 것을 직접 볼 수 있다. <strong>손실함수를 고르는 일이 곧 잡음 모델을 고르는 일</strong>이라는 앞 절들의 이야기가, MLE라는 하나의 원리 아래에서 같은 문장의 다른 표현이 된다.</p>
+          <p class="interp"><strong>좋은 성질들.</strong> MLE가 널리 쓰이는 데는 이유가 있다. <em>일치성</em> — 모델이 참분포를 포함하고 표본이 늘면 \(\hat\theta_N\)이 참값으로 수렴한다. <em>점근적 정규성</em> — 큰 \(N\)에서 \(\hat\theta\)의 분포가 참값 주변의 가우시안에 가까워지고, 그 폭이 피셔 정보로 결정되어 신뢰구간을 줄 수 있다. <em>불변성</em> — \(g(\theta)\)를 추정하고 싶으면 다시 풀 필요 없이 \(g(\hat\theta_{\text{MLE}})\)를 쓰면 된다. 표준편차의 MLE가 분산 MLE의 제곱근인 것이 그 예다.</p>
+          <p class="interp"><strong>한계 세 가지.</strong> 첫째, <em>편향이 있을 수 있다</em>. 가우시안 분산의 MLE \(\hat\sigma^2\)는 \(N\)으로 나누는데, 이는 이미 데이터로 정한 \(\hat\mu\)를 기준으로 편차를 재기 때문에 참값보다 체계적으로 작게 나온다(\(\mathbb{E}[\hat\sigma^2]=\frac{N-1}{N}\sigma^2\)). 흔히 보는 \(N-1\)로 나누는 표본분산은 이 편향을 보정한 <em>다른</em> 추정량이다. 둘째, <em>과적합</em> — 데이터가 적거나 파라미터가 많으면 가능도는 관측된 표본에 지나치게 맞춰진다. 극단적으로 어떤 사건이 한 번도 관측되지 않으면 MLE는 그 확률을 정확히 0으로 배정하고, 정보이론 글에서 보듯 그 사건이 실제로 일어나는 순간 손실이 무한대가 된다. 셋째, <em>점추정이다</em> — 값 하나만 돌려줄 뿐 "얼마나 확신하는가"를 말해주지 않는다.</p>
+          <p class="interp"><strong>그래서 다음 절들로 이어진다.</strong> 곱을 그대로 최대화하면 수치적으로 무너지므로 로그를 취해 합으로 바꾸고 부호를 뒤집는다 — 그것이 다음 절의 NLL이며, 실제 구현에서 최소화하는 대상이다. 그리고 위의 세 한계를 다루려면 \(\theta\)에 사전분포를 부여해야 하는데, 그것이 베이즈 정리와 MAP다. 실제로 <strong>MAP에서 사전분포를 균등하게 두면 정확히 MLE로 돌아온다</strong> — MLE는 "모든 파라미터 값을 똑같이 선호한다"고 선언한 MAP의 특수한 경우다.</p>
+          <p class="interp"><strong>머신러닝에서.</strong> 지도학습의 표준 손실은 거의 전부 조건부 MLE다. 조건부 모델 \(p(y\mid x,\theta)\)에 대해 \(\hat\theta=\arg\max_\theta\sum_i\log p(y^{(i)}\mid x^{(i)},\theta)\)를 푸는 것이며, 카테고리 분포를 넣으면 크로스엔트로피, 가우시안을 넣으면 MSE, 라플라스를 넣으면 MAE가 나온다. 언어 모델의 다음 토큰 예측은 어휘 위 카테고리 분포의 MLE를 연쇄법칙으로 문장 전체에 확장한 것이고, 정규화 흐름과 자기회귀 생성 모델도 로그가능도를 직접 최대화한다. "모델을 학습한다"는 말은 대개 이 문장의 줄임말이다.</p>
+          <p class="formula">\[\begin{aligned} \hat{\theta}_{\text{MLE}} &amp;= \arg\max_{\theta} \prod_{i=1}^{N} p(x^{(i)}\mid\theta) = \arg\max_{\theta} \sum_{i=1}^{N} \log p(x^{(i)}\mid\theta) \\ \text{Bernoulli}(\theta) &amp;\;\longrightarrow\; \hat\theta = \tfrac{1}{N}\textstyle\sum_i x^{(i)} \quad (\text{상대빈도}) \\ \mathcal{N}(\mu,\sigma^2) &amp;\;\longrightarrow\; \hat\mu = \bar{x} \quad (\text{표본평균}) \\ \mathrm{Laplace}(\mu,b) &amp;\;\longrightarrow\; \hat\mu = \mathrm{median}(x) \quad (\text{중앙값}) \end{aligned}\]</p>
+          <p class="hint">분포족 버튼으로 가우시안과 라플라스를 바꿔보세요. 같은 데이터인데 MLE 해가 표본평균에서 중앙값으로 옮겨갑니다. 위 그림 오른쪽 끝을 클릭해 <strong>이상치</strong>를 하나 추가하면, 가우시안 해는 끌려가고 라플라스 해는 거의 그대로인 것을 볼 수 있습니다 — 분포 가정이 곧 이상치에 대한 태도입니다.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-mle" width="640" height="320"></canvas>
+          <div class="controls preset-row" id="mle-family">
+            <button type="button" data-family="gauss" class="active">가우시안 → 평균</button>
+            <button type="button" data-family="laplace">라플라스 → 중앙값</button>
+          </div>
+          <p class="tensor-label">로그가능도 ℓ(μ) — 최대점(초록)이 MLE 해</p>
+          <canvas id="c-mle-curve" width="640" height="280"></canvas>
+          <div class="controls">
+            <button type="button" id="mle-outlier">이상치 추가</button>
+            <button type="button" id="mle-reset">초기화</button>
+          </div>
+          <p class="readout" id="r-mle"></p>
+        </div>
+      </div>
+      <details class="snippet-box">
+        <summary>Python 코드로 보기</summary>
+        <pre class="snippet"><code>import numpy as np
+from scipy.optimize import minimize_scalar
+
+x = np.array([-1.2, 0.3, 0.9, 1.8, 2.4, 9.0])   # 마지막 점이 이상치
+
+# 가우시안 MLE: 제곱오차를 최소화 → 표본평균
+gauss_nll = lambda mu: np.sum((x - mu) ** 2)
+# 라플라스 MLE: 절대오차를 최소화 → 중앙값
+laplace_nll = lambda mu: np.sum(np.abs(x - mu))
+
+print(minimize_scalar(gauss_nll).x,   np.mean(x))      # 2.20 2.20
+print(minimize_scalar(laplace_nll).x, np.median(x))    # 1.35 1.35
+
+# 베르누이 MLE는 그냥 상대빈도
+flips = np.array([1, 0, 1, 1, 1, 0, 1, 1, 0, 1])
+print(flips.mean())                                     # 0.7</code></pre>
+      </details>
+    </section>
+
+    <!-- 17. Log-Likelihood & NLL -->
+    <section id="nll" class="topic">
+      <h2>로그가능도와 NLL <span class="en">Log-Likelihood &amp; NLL</span></h2>
+      <p class="topic-lead">가능도는 확률의 곱이라 데이터가 조금만 늘어도 수치적으로 0이 되어버린다. 로그를 취해 곱을 합으로 바꾸는 이 한 번의 변환이, 머신러닝의 손실함수가 거의 예외 없이 음의 로그가능도 형태인 이유다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 가능도에 로그를 취한 것이 로그가능도 \(\ell(\theta)=\log L(\theta)=\sum_i \log p(x^{(i)}\mid\theta)\)이고, 부호를 뒤집어 최소화 문제로 바꾼 것이 <strong>음의 로그가능도(NLL)</strong> \(-\ell(\theta)\)다. 최적화 관행상 손실은 최소화하는 것이므로 후자를 쓴다.</p>
+          <p class="interp"><strong>이유 1: 곱은 수치적으로 무너진다.</strong> 각 \(p(x^{(i)})\)가 0.2쯤이라면 \(N=100\)에서 곱은 \(10^{-70}\), \(N=500\)에서는 float64가 표현할 수 있는 하한(\(\approx 10^{-308}\))을 넘겨 <strong>정확히 0</strong>이 된다. 0이 되는 순간 어떤 \(\theta\)가 더 나은지 비교할 수 없고 gradient도 죽는다. 로그를 취하면 곱이 합이 되어 이 문제가 통째로 사라진다.</p>
+          <p class="interp"><strong>이유 2: argmax가 보존된다.</strong> \(\log\)는 순증가 함수이므로 \(L(\theta_1)&gt;L(\theta_2)\)와 \(\log L(\theta_1)&gt;\log L(\theta_2)\)는 동치다. 즉 로그를 취해도 <em>최적해는 조금도 달라지지 않는다.</em> 최적화하기 쉬운 대상으로 바꾸되 답은 그대로 두는, 공짜에 가까운 변환이다.</p>
+          <p class="interp"><strong>이유 3: 미분이 분해된다.</strong> 곱의 미분은 곱의 규칙 때문에 항이 뒤엉키지만, 합의 미분은 항별 미분의 합이다. 그래서 \(\nabla_\theta \ell = \sum_i \nabla_\theta \log p(x^{(i)}\mid\theta)\)가 되고, 이 합을 미니배치로 근사하는 것이 곧 SGD다. <em>기대값의 선형성 → 미니배치 추정</em>이라는 앞의 논리가 여기서 그대로 재사용된다.</p>
+          <p class="interp"><strong>그래서 손실함수는 전부 NLL이다.</strong> 지금까지 본 것을 모으면 다음 표가 된다 — 손실함수를 고르는 일은 사실 <strong>분포를 고르는 일</strong>이다.</p>
+          <p class="formula">\[\begin{aligned} \text{카테고리 분포} &amp;\;\longrightarrow\; -\log p_c \;=\; \text{크로스엔트로피} \\ \text{가우시안} &amp;\;\longrightarrow\; \tfrac{1}{2\sigma^2}(y-\hat{y})^2 \;=\; \text{MSE} \\ \text{라플라스} &amp;\;\longrightarrow\; \tfrac{1}{b}|y-\hat{y}| \;=\; \text{MAE} \\ \mathcal{L}(\theta) &amp;= -\sum_{i=1}^{N} \log p(x^{(i)} \mid \theta) \end{aligned}\]</p>
+          <p class="hint">N 슬라이더를 키워보세요. 리드아웃의 "곱"은 급격히 작아지다가 어느 지점에서 <strong>0 (언더플로)</strong>로 무너지지만, "로그합"은 아무 일 없다는 듯 선형으로 내려갑니다. 빨간 세로선이 float64가 곱을 포기하는 지점입니다.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-nll" width="640" height="360"></canvas>
+          <div class="controls">
+            <label>데이터 수 N = <span id="nll-n-val">10</span> <input id="nll-n" type="range" min="1" max="400" step="1" value="10"></label>
+          </div>
+          <p class="readout" id="r-nll"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 17. Bayes' Rule -->
+    <section id="bayes" class="topic">
+      <h2>베이즈 정리 <span class="en">Bayes' Rule</span></h2>
+      <p class="topic-lead">사전분포에 가능도를 곱하고 정규화하면 사후분포가 된다. 데이터를 관측하기 전의 믿음이 관측을 거쳐 어떻게 갱신되는지를 기술하는 규칙이며, 조건부확률의 정의를 뒤집은 것에 지나지 않는다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> \(P(x,\theta)\)를 두 가지 순서로 분해하면(연쇄법칙) \(P(\theta\mid x)P(x)=P(x\mid\theta)P(\theta)\)이고, 양변을 \(P(x)\)로 나누면 베이즈 정리가 나온다: \(P(\theta\mid x)=\frac{P(x\mid\theta)P(\theta)}{P(x)}\). 새로운 공리가 아니라 <em>조건부확률의 정의를 뒤집은 것</em>에 지나지 않는다.</p>
+          <p class="interp"><strong>네 조각의 이름.</strong> \(P(\theta)\)는 데이터를 보기 전의 믿음인 <strong>사전분포(prior)</strong>, \(P(x\mid\theta)\)는 앞 절의 <strong>가능도</strong>, \(P(\theta\mid x)\)는 데이터를 본 뒤의 믿음인 <strong>사후분포(posterior)</strong>, 그리고 분모 \(P(x)=\int P(x\mid\theta)P(\theta)\,d\theta\)는 <strong>증거(evidence)</strong>다. 증거는 \(\theta\)에 의존하지 않는 정규화 상수라, 대개 \(P(\theta\mid x)\propto P(x\mid\theta)P(\theta)\)로만 쓴다 — 하지만 그 적분이 바로 앞서 본 주변화의 병목이다.</p>
+          <p class="interp"><strong>MLE와 무엇이 다른가.</strong> MLE는 가능도만 보고 \(\theta\) 하나를 고른다. 베이즈는 사전분포를 곱하고, 결과로 <em>점 하나가 아니라 분포 전체</em>를 얻는다. 그래서 "가장 그럴듯한 \(\theta\)"뿐 아니라 "그 추정이 얼마나 확실한가"까지 함께 답할 수 있다. 데이터가 적을수록 사후분포는 넓고 사전분포에 가까우며, 데이터가 쌓일수록 좁아지고 가능도가 주도권을 가져간다.</p>
+          <p class="interp"><strong>오른쪽 예시: 동전의 앞면 확률 추정.</strong> \(\theta\)를 앞면이 나올 확률이라 하고 사전분포를 \(\mathrm{Beta}(2,2)\)("아마 절반 근처일 것이다")로 둔다. 앞면 \(h\)회, 뒷면 \(t\)회를 관측하면 사후분포는 정확히 \(\mathrm{Beta}(2+h,\,2+t)\)가 된다 — 사전분포와 사후분포가 같은 족에 머무는 이런 짝을 <strong>켤레 사전분포</strong>라 하고, 덕분에 적분 없이 파라미터 덧셈만으로 갱신이 끝난다.</p>
+          <p class="interp"><strong>머신러닝에서.</strong> 베이즈 신경망은 가중치에 사후분포를 두고, 불확실성 추정과 능동학습이 그 위에서 이뤄진다. 실용적으로 더 흔한 쓰임은 다음 절의 MAP다 — 사후분포 전체를 계산하는 대신 최대점만 취하면, 정규화 항이 붙은 익숙한 최적화 문제가 된다.</p>
+          <p class="formula">\[\begin{aligned} P(\theta \mid x) &amp;= \frac{P(x \mid \theta)\,P(\theta)}{P(x)}, \qquad P(x) = \int P(x\mid\theta)P(\theta)\,d\theta \\ \text{posterior} &amp;\;\propto\; \text{likelihood} \times \text{prior} \\ \mathrm{Beta}(a,b) \;\xrightarrow{\;h,\,t\;}\; &amp;\mathrm{Beta}(a+h,\, b+t) \end{aligned}\]</p>
+          <p class="hint">"관측 누적 재생"을 눌러보세요. 회색 점선(사전분포)에서 시작한 보라색 사후분포가 관측이 쌓일수록 좁아지며 참값(초록 선) 주변으로 모입니다. 관측이 5회 이하일 때 사후평균과 MLE가 얼마나 다른지, 그리고 50회쯤에서 둘이 얼마나 가까워지는지 비교해보세요.</p>
+        </div>
+        <div class="topic-demo">
+          <canvas id="c-bayes" width="640" height="400"></canvas>
+          <div class="controls">
+            <label>관측 수 = <span id="bayes-n-val">0</span> <input id="bayes-n" type="range" min="0" max="60" step="1" value="0"></label>
+            <button type="button" id="bayes-play">관측 누적 재생</button>
+          </div>
+          <p class="readout" id="r-bayes"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 18. Prior & MAP -->
+    <section id="map" class="topic">
+      <h2>사전분포와 MAP <span class="en">Prior &amp; MAP</span></h2>
+      <p class="topic-lead">사후분포의 최대점을 택하는 MAP 추정은 가능도에 사전분포라는 항이 하나 더해진 최적화다. 가우시안 사전분포는 L2 정규화가 되고 라플라스 사전분포는 L1 정규화가 되며, 후자만이 해를 정확히 0으로 만든다.</p>
+      <div class="topic-body">
+        <div class="topic-text">
+          <p class="definition"><strong>정의.</strong> 사후분포 전체를 다루는 대신 그 최대점 하나만 취하는 것이 <strong>MAP(maximum a posteriori) 추정</strong>이다: \(\hat\theta_{\text{MAP}}=\arg\max_\theta P(x\mid\theta)P(\theta)\). 증거 \(P(x)\)는 \(\theta\)에 무관하므로 argmax에 영향을 주지 않아 떼어낼 수 있다.</p>
+          <p class="interp"><strong>MLE와 MAP의 차이.</strong> 둘 다 파라미터 하나를 고르는 점추정이지만 판단 재료가 다르다. MLE는 \(P(x\mid\theta)\)만 최대화해 <em>데이터에 가장 잘 맞는 값</em>을 고르고, MAP는 여기에 사전분포 \(P(\theta)\)를 곱해 <em>데이터에도 잘 맞고 사전지식에도 그럴듯한 값</em>을 고른다. 데이터가 적을 때는 prior가 MAP를 안정시키는 효과가 크고, 데이터가 많아 가능도가 매우 뾰족해지면 보통 MLE와 MAP가 가까워진다. 단, MAP는 사후분포 전체가 아니라 최대점 하나만 남기므로 완전한 베이즈 추론처럼 불확실성 전체를 보존하지는 않는다.</p>
+          <p class="interp"><strong>로그를 취하면 정규화가 나타난다.</strong> 앞 절의 습관대로 음의 로그를 취하면 곱이 합으로 갈라진다: \(-\log P(x\mid\theta)-\log P(\theta)\). 첫 항은 우리가 이미 아는 NLL(데이터 항)이고, <strong>두 번째 항이 정규화 항</strong>이다. 정규화는 최적화를 위해 나중에 덧붙인 장치가 아니라, <em>사전분포를 갖는 순간 자동으로 따라 나오는 항</em>이다.</p>
+          <p class="interp"><strong>가우시안 사전분포 = L2 = 릿지.</strong> \(P(\theta)=\mathcal{N}(0,\tau^2)\)로 두면 \(-\log P(\theta)=\frac{\theta^2}{2\tau^2}+\text{const}\), 즉 \(\frac{\lambda}{2}\|\theta\|^2\)다. 오른쪽의 1차원 제곱오차 예제에서는 해가 \(\hat\theta=\hat\theta_{\text{MLE}}/(1+\lambda)\)로 <em>비례 축소</em>된다. 이 닫힌 식은 해당 예제의 스케일에 대한 것이며 모든 모델에 그대로 적용되는 공식은 아니다. 일반적으로도 L2는 파라미터를 0 쪽으로 부드럽게 줄이는 경향을 갖는다.</p>
+          <p class="interp"><strong>라플라스 사전분포 = L1 = 라쏘.</strong> \(P(\theta)\propto e^{-|\theta|/b}\)로 두면 페널티는 \(\lambda|\theta|\)이다. 같은 1차원 제곱오차 예제에서는 해가 \(\hat\theta=\mathrm{sign}(\hat\theta_{\text{MLE}})\max(0,\,|\hat\theta_{\text{MLE}}|-\lambda)\)인 soft-thresholding 형태가 되어, \(\lambda\)가 충분히 크면 <strong>정확히 0</strong>이 된다. 계수의 정확한 스케일은 목적함수 정의에 따라 달라지지만, 원점의 뾰족한 꼭짓점 때문에 L1이 희소해를 유도한다는 성질은 그대로다.</p>
+          <p class="interp"><strong>MLE는 MAP의 특수한 경우다.</strong> 사전분포를 평평하게(균등하게) 두면 \(-\log P(\theta)\)가 상수가 되어 사라지고, MAP는 MLE로 되돌아온다. 정규화를 끄는 것(\(\lambda=0\))은 "모든 파라미터 값을 똑같이 선호한다"고 선언하는 것과 같은 말이다.</p>
+          <p class="formula">\[\begin{aligned} \hat\theta_{\text{MAP}} &amp;= \arg\min_\theta \big[\underbrace{-\log P(x\mid\theta)}_{\text{NLL}} \;\underbrace{-\log P(\theta)}_{\text{정규화}}\big] \\ \mathcal{N}(0,\tau^2) &amp;\;\longrightarrow\; \tfrac{\lambda}{2}\|\theta\|_2^2 \;\;(\text{L2, Ridge}) \\ \mathrm{Laplace}(0,b) &amp;\;\longrightarrow\; \lambda\|\theta\|_1 \;\;(\text{L1, Lasso}) \end{aligned}\]</p>
+          <p class="hint">λ를 0에서 키우며 두 사전분포를 번갈아 눌러보세요. 가우시안에서는 초록 해가 0을 향해 <em>다가가기만</em> 하지만, 라플라스에서는 λ가 1.6을 넘는 순간 <strong>정확히 0에 도달</strong>합니다. 보라색 목적함수 곡선이 원점에서 꺾이는 모양이 그 원인입니다.</p>
+        </div>
+        <div class="topic-demo">
+          <div class="controls preset-row" id="map-prior">
+            <button type="button" data-prior="gaussian" class="active">가우시안 사전분포 (L2)</button>
+            <button type="button" data-prior="laplace">라플라스 사전분포 (L1)</button>
+          </div>
+          <canvas id="c-map" width="640" height="400"></canvas>
+          <div class="controls">
+            <label>사전분포 강도 λ = <span id="map-lam-val">0.00</span> <input id="map-lam" type="range" min="0" max="4" step="0.05" value="0"></label>
+          </div>
+          <p class="readout" id="r-map"></p>
+        </div>
+      </div>
+    </section>
+
+        <a class="back-link" href="../../index.html">&larr; Back to all posts</a>
+      </div>
+    </div>

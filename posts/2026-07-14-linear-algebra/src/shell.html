@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="{{description}}">
+  <meta name="theme-color" content="#ffffff">
+{{alternates}}
+  <link rel="stylesheet" href="../../styles.css">
+  <link rel="stylesheet" href="../../vendor/katex/katex.min.css">
+  <!-- Shared interactive-post chrome and demo components. -->
+  <link rel="stylesheet" href="../../css/post.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23f97316'/%3E%3C/svg%3E">
+  <title>{{title}}</title>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <header class="site-header">
+    <a class="brand" href="../../index.html">Blog <span>· Seungheon Doh</span></a>
+    <nav>
+      <a href="https://seungheondoh.github.io/" target="_blank" rel="noopener noreferrer">About</a>
+    </nav>
+  </header>
+
+  <main id="main-content" class="la-page">
+{{content}}
+  </main>
+
+  <footer class="site-footer">
+    <p>© <span id="current-year">2026</span> Seungheon Doh</p>
+    <a href="https://seungheondoh.github.io/" target="_blank" rel="noopener noreferrer">seungheondoh.github.io</a>
+  </footer>
+
+  <script src="../../js/common.js"></script>
+  <!-- Shared engine: LA math helpers, Plane2D / Iso3D, makeDraggable. -->
+  <script src="../../js/engine.js"></script>
+  <script defer src="./interactive.js"></script>
+  <script defer src="../../vendor/katex/katex.min.js"></script>
+  <script defer src="../../vendor/katex/contrib/auto-render.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof renderMathInElement === 'function') {
+        renderMathInElement(document.body, {
+          delimiters: [
+            { left: '\\(', right: '\\)', display: false },
+            { left: '\\[', right: '\\]', display: true },
+          ],
+          throwOnError: false,
+        });
+      }
+    });
+  </script>
+</body>
+</html>

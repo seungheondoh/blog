@@ -1,0 +1,164 @@
+/*
+ * Interactive-demo components shared across the maths posts. Loaded after
+ * css/post.css, which carries the page chrome (.topic, .la-index, .controls,
+ * .readout, canvas sizing, …).
+ *
+ * Each block notes which engine builds the markup, so a change here can be
+ * traced to the JS that depends on it.
+ */
+
+/* ---------------------------------------------------------------- heatmap */
+/* Built by Heatmap in js/prob-engine.js. Used by the probability post (joint /
+   marginal / conditional / independence), information theory (mutual
+   information, InfoNCE similarity matrix). */
+
+.heatmap-box {
+  display: grid;
+  gap: 2px;
+  margin: 0 0 .6rem;
+  /* Set by Heatmap once it knows the grid size. */
+  grid-template-columns: auto repeat(var(--cols, 5), 1fr);
+}
+
+.heatmap-cell {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 3px;
+  font-size: .72rem;
+  font-variant-numeric: tabular-nums;
+  cursor: ns-resize;
+  user-select: none;
+  transition: outline-color .12s ease;
+  outline: 2px solid transparent;
+}
+
+.heatmap-cell.selected { outline-color: #f97316; }
+.heatmap-cell.dimmed { opacity: .28; }
+
+/* Row/column sums drawn alongside the grid during marginalization. */
+.heatmap-margin {
+  display: grid;
+  place-items: center;
+  font-size: .72rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.heatmap-axis {
+  font-size: .7rem;
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+}
+
+/* ------------------------------------------------------------- bar racks */
+/* Drag-to-reshape discrete distributions. Built by BarRack in the information
+   theory post's interactive.js (entropy, coding, perplexity). */
+
+.bar-rack {
+  display: grid;
+  gap: 4px;
+  align-items: end;
+  height: 190px;
+  margin: 0 0 .5rem;
+  padding: .4rem .3rem 0;
+  border: 1px solid var(--line, #e2e2e2);
+  border-radius: 6px;
+  background: #fff;
+  touch-action: none;
+}
+
+.bar-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100%;
+  cursor: ns-resize;
+  user-select: none;
+}
+
+.bar-col .bar-fill {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  background: rgba(6, 69, 173, .55);
+  transition: background .12s ease;
+}
+
+.bar-col.reference .bar-fill { background: rgba(140, 140, 140, .45); }
+.bar-col:focus-visible { outline: 2px solid #f97316; outline-offset: 2px; }
+
+.bar-col .bar-label {
+  font-size: .68rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  padding-top: 2px;
+}
+
+/* ------------------------------------------------------------ token cells */
+/* Small labelled chips laid out in a row. Used for the autoregressive token
+   strip (probability, chain rule) and per-symbol code lengths (information
+   theory, coding). */
+
+.token-strip,
+.code-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  margin: 0 0 .6rem;
+}
+
+.token-cell {
+  padding: .3rem .55rem;
+  border: 1px solid var(--line, #e2e2e2);
+  border-radius: 4px;
+  font-size: .78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.token-cell.conditioned { background: rgba(6, 69, 173, .08); }
+.token-cell.current { border-color: #f97316; background: rgba(249, 115, 22, .1); }
+
+.code-cell {
+  padding: .3rem .5rem;
+  border: 1px solid var(--line, #e2e2e2);
+  border-radius: 4px;
+  font-size: .74rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.code-cell b {
+  display: block;
+  font-weight: 600;
+  color: #0645ad;
+}
+
+/* ------------------------------------------------------------ field plots */
+/* Scalar/vector field figures drawn by the Chart2D extensions in
+   js/calc-engine.js (heat, contour, quiver). */
+
+/* Paired canvases sit side by side and want to be shorter than the 300px
+   default that .topic-demo canvas sets. */
+.topic-demo-dual canvas { height: 210px; }
+
+.field-legend {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin: .1rem 0 .5rem;
+  font-size: .72rem;
+  color: var(--muted);
+}
+
+.field-legend .ramp {
+  flex: 1;
+  height: 9px;
+  border-radius: 3px;
+  border: 1px solid var(--line, #e2e2e2);
+  /* Matches Calc.diverging() in js/calc-engine.js: blue (−) → white → red (+). */
+  background: linear-gradient(to right,
+    rgb(45, 125, 255), rgb(150, 190, 255), #fff, rgb(255, 180, 150), rgb(255, 105, 65));
+}
