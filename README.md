@@ -66,6 +66,20 @@ maintained by hand:
 - `sitemap.xml` is regenerated with a `lastmod` per post and `xhtml:link`
   alternates pairing the language versions.
 
+The sharing card (`og:image`) is the one piece that is **not** part of the build,
+because rasterizing text needs a browser and `build.mjs` has to stay runnable
+with nothing but node. After adding a post:
+
+```
+node og-images.mjs
+```
+
+It writes `posts/<slug>/og.png` (and `og.png` at the root) at 1200×630 from
+`posts.json`, using Chrome in headless mode. Commit the PNGs. `build.mjs` emits
+`og:image` only for posts whose file exists and prints a `note:` for the ones
+missing it, so a forgotten run leaves a text-only card rather than one pointing
+at a 404.
+
 All absolute URLs come from `SITE` at the top of `build.mjs`; moving the site is
 a one-line change there followed by a rebuild.
 

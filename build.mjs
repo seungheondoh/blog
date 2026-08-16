@@ -278,12 +278,30 @@ function seoHead({ locale, locales, slug, iso, minutes, author }) {
     lines.push(`  <meta property="og:locale:alternate" content="${OG_LOCALE[l.lang] ?? l.lang}">`);
   }
   if (iso) lines.push(`  <meta property="article:published_time" content="${iso}">`);
+  lines.push(`  <meta property="article:author" content="${escapeHtml(author)}">`);
+
+  // Rendered by og-images.mjs, which needs a browser and so is not part of this
+  // build. A post without one still gets a valid card, just a text-only one —
+  // better than pointing og:image at a file that 404s.
+  const image = `${SITE}/posts/${slug}/og.png`;
+  const hasImage = existsSync(path.join(ROOT, 'posts', slug, 'og.png'));
+  if (hasImage) {
+    lines.push(
+      `  <meta property="og:image" content="${image}">`,
+      `  <meta property="og:image:width" content="1200">`,
+      `  <meta property="og:image:height" content="630">`,
+      `  <meta property="og:image:alt" content="${escapeHtml(headline)}">`,
+    );
+  } else if (locale.output === 'index.html') {
+    console.warn(`  note: no posts/${slug}/og.png — run \`node og-images.mjs\``);
+  }
+
   lines.push(
-    `  <meta property="article:author" content="${escapeHtml(author)}">`,
-    `  <meta name="twitter:card" content="summary">`,
+    `  <meta name="twitter:card" content="${hasImage ? 'summary_large_image' : 'summary'}">`,
     `  <meta name="twitter:title" content="${escapeHtml(headline)}">`,
     `  <meta name="twitter:description" content="${escapeHtml(locale.description)}">`,
   );
+  if (hasImage) lines.push(`  <meta name="twitter:image" content="${image}">`);
 
   const record = {
     '@context': 'https://schema.org',
@@ -297,6 +315,7 @@ function seoHead({ locale, locales, slug, iso, minutes, author }) {
     publisher: { '@type': 'Person', name: author, url: AUTHOR_URL },
     isPartOf: { '@type': 'Blog', name: BLOG_NAME, url: `${SITE}/` },
   };
+  if (hasImage) record.image = image;
   if (iso) {
     record.datePublished = iso;
     record.dateModified = iso;
