@@ -23,7 +23,7 @@ A post opts into the build by adding a `src/` folder. `posts/2026-08-16-linear-a
 posts/<slug>/
   src/content.html   structure + copy, written in the source language
   src/shell.html     page chrome, with {{lang}} {{title}} {{description}}
-                     {{alternates}} {{content}} placeholders
+                     {{seo}} {{content}} placeholders
   src/ko.mjs         the source language — chrome only, `source: true`
   src/en.mjs         a translation overlay: headings, prose, UI strings
   ko.html            GENERATED — do not edit
@@ -47,6 +47,34 @@ The build fails, rather than shipping a half-translated page, when:
 It also warns about translation entries that no longer match anything, which is how you find stale copy after editing `content.html`.
 
 To edit: change prose in `src/content.html` (source language) or `src/en.mjs` (translation), then rerun `node build.mjs`. Never edit the generated `.html` files — they carry a banner saying so, and the next build overwrites them.
+
+## Search engines
+
+`node build.mjs` also emits everything a crawler needs, so none of it is
+maintained by hand:
+
+- `{{seo}}` in each shell expands to the page's canonical URL, `hreflang` links
+  to every language (plus `x-default`), Open Graph / Twitter card tags, and a
+  `BlogPosting` JSON-LD record carrying the title, description, date, author and
+  reading time.
+- The default-language page is canonical at its **directory** (`…/<slug>/`), not
+  at `…/<slug>/index.html`, so the two spellings do not compete as duplicates.
+- `index.html`'s post list is written into the file as static HTML from
+  `posts.json`. `js/home.js` still re-renders it at run time — a `posts.json`
+  edit shows up without a build — but a crawler that does not run JavaScript now
+  sees the full list.
+- `sitemap.xml` is regenerated with a `lastmod` per post and `xhtml:link`
+  alternates pairing the language versions.
+
+All absolute URLs come from `SITE` at the top of `build.mjs`; moving the site is
+a one-line change there followed by a rebuild.
+
+Two things live outside this repo:
+
+- `seungheondoh.github.io/robots.txt` lists `…/blog/sitemap.xml`. Crawlers read
+  robots.txt only from the domain root, so `blog/robots.txt` alone is ignored.
+- Submitting the sitemap in Google Search Console is what actually gets the
+  posts crawled promptly; the files above only make that possible.
 
 ## Local preview
 

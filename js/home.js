@@ -12,14 +12,20 @@ function byline(post) {
   return parts.join('<span class="post-meta-sep">|</span>');
 }
 
+// build.mjs writes the same list into index.html, so the page is complete before
+// this runs. Re-rendering keeps a posts.json-only edit visible without a build;
+// a failure leaves the static list in place rather than replacing it with an error.
 async function loadPosts() {
   const list = document.querySelector('#post-list');
+  const prerendered = !list.querySelector('.empty');
   try {
     const res = await fetch('./posts.json', { cache: 'no-cache' });
     if (!res.ok) throw new Error(`Failed to load posts.json (${res.status})`);
     const posts = await res.json();
 
-    posts.sort((a, b) => (a.date < b.date ? 1 : -1));
+    // Ties keep posts.json's own order — `localeCompare` answers 0 for two posts
+    // sharing a date, where a `<`/`-1` comparator would answer inconsistently.
+    posts.sort((a, b) => b.date.localeCompare(a.date));
 
     if (posts.length === 0) {
       list.innerHTML = '<li class="empty">No posts yet.</li>';
@@ -38,7 +44,7 @@ async function loadPosts() {
         `)
       .join('');
   } catch (err) {
-    list.innerHTML = `<li class="empty">Could not load posts: ${err.message}</li>`;
+    if (!prerendered) list.innerHTML = `<li class="empty">Could not load posts: ${err.message}</li>`;
   }
 }
 

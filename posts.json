@@ -1,10 +1,10 @@
 [
   {
-    "slug": "2026-08-23-sde-and-diffusion",
+    "slug": "2026-08-16-sde-and-diffusion",
     "title": "Interactive Stochastic Differential Equations",
-    "date": "2026-08-23",
+    "date": "2026-08-16",
     "summary": "Random walks and Brownian motion, stochastic processes and the Markov property, Itô calculus and SDEs, and finally the Fokker–Planck equation and the probability flow ODE that underpins diffusion models.",
-    "url": "./posts/2026-08-23-sde-and-diffusion/index.html",
+    "url": "./posts/2026-08-16-sde-and-diffusion/index.html",
     "readingMinutes": 41,
     "author": "Seungheon Doh"
   },

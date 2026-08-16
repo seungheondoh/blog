@@ -18,7 +18,7 @@ export default {
   heading: 'Interactive Differential Equations',
   languageLink: '<a class="language-link" href="./ko.html" lang="ko">Korean ver.</a>',
 
-  footnote: 'References: Fu &amp; Wang, <em>A Tutorial on Diffusion Theory: From Differential Equations to Diffusion Models</em> (INSAIT), and <a href="https://najeebkhan.github.io//blog/ODE.html" target="_blank" rel="noopener noreferrer">Najeeb Khan, <em>On Differential Equations</em></a>. The preparatory article is <a href="../2026-08-08-interactive-calculus/index.html">Interactive Calculus</a>, and the sequel is <a href="../2026-08-23-sde-and-diffusion/index.html">Interactive Stochastic Differential Equations</a>.',
+  footnote: 'References: Fu &amp; Wang, <em>A Tutorial on Diffusion Theory: From Differential Equations to Diffusion Models</em> (INSAIT), and <a href="https://najeebkhan.github.io//blog/ODE.html" target="_blank" rel="noopener noreferrer">Najeeb Khan, <em>On Differential Equations</em></a>. The preparatory article is <a href="../2026-08-08-interactive-calculus/index.html">Interactive Calculus</a>, and the sequel is <a href="../2026-08-16-sde-and-diffusion/index.html">Interactive Stochastic Differential Equations</a>.',
 
   navLabel: 'Topics in this article',
 
@@ -34,7 +34,7 @@ export default {
         There are two parts. First, ordinary differential equations and their numerical methods — direction fields and initial value problems, phase portraits, the Euler and Runge–Kutta methods, and numerical stability, which is a different problem from accuracy. Then partial differential equations — the transport, continuity and diffusion equations, and how to translate the language of particles into the language of densities. In the numerical-methods sections you can watch <strong>the solution actually diverge at a step size you choose</strong>.
       </p>
       <p class="la-sub">
-        Everything here is deterministic: the same initial value always produces the same trajectory. Mix randomness into that motion and it becomes an SDE, whose density evolution is the Fokker–Planck equation, and at the end of that road lie diffusion models — the story of the <a href="../2026-08-23-sde-and-diffusion/index.html">next article</a>.
+        Everything here is deterministic: the same initial value always produces the same trajectory. Mix randomness into that motion and it becomes an SDE, whose density evolution is the Fokker–Planck equation, and at the end of that road lie diffusion models — the story of the <a href="../2026-08-16-sde-and-diffusion/index.html">next article</a>.
       </p>`,
 
   topics: {
