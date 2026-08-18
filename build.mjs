@@ -237,6 +237,32 @@ function applyMeta(html, locale) {
   };
 }
 
+// Adds a compact, collapsed update history directly below the byline. Locale
+// modules may provide `updates: [{ date, note }]`; every article otherwise gets
+// a single publication entry derived from its canonical date.
+function applyUpdateLog(html, locale, published) {
+  if (!published) return html;
+  const updates = locale.updates?.length
+    ? locale.updates
+    : [{ date: published, note: locale.lang === 'ko' ? '최초 게시.' : 'Published.' }];
+  const entries = updates.map((update) => {
+    const [y, m, d] = update.date.split('-').map(Number);
+    const date = `${MONTHS[m - 1]} ${d}, ${y}`;
+    const note = typeof update.note === 'object'
+      ? update.note[locale.lang] ?? update.note.en ?? ''
+      : update.note;
+    return `<li><time datetime="${update.date}">${date}</time><span>${escapeHtml(note ?? '')}</span></li>`;
+  }).join('');
+  const log = `
+      <details class="update-log">
+        <summary>Update log</summary>
+        <ul>${entries}</ul>
+      </details>`;
+  const meta = locate(html, /<p class="la-meta">/, 'p');
+  if (!meta) return html;
+  return html.slice(0, meta.end) + log + html.slice(meta.end);
+}
+
 /* ------------------------------------------------------------------ seo head */
 
 // Canonical URL for one generated page. The default-language page is canonical
@@ -355,7 +381,7 @@ async function buildPost(dir, stats) {
       stripComments(applyHeading(locale.source ? content : localize(content, locale), locale.heading)),
       locale,
     );
-    const body = meta.html;
+    const body = applyUpdateLog(meta.html, locale, meta.iso);
     stats.set(locale.output, { ...meta, lang: locale.lang });
     const page = shell
       .replace('{{lang}}', locale.lang)
@@ -433,6 +459,17 @@ const prettyDate = (iso) => {
   return `${MONTHS[m - 1]} ${d}, ${y}`;
 };
 
+const TAG_CLASSES = { Study: 'study', Article: 'article', Essay: 'essay' };
+
+const tagMarkup = (tag) => {
+  const className = TAG_CLASSES[tag];
+  return className
+    ? `<span class="post-tag post-tag--${className}">${escapeHtml(tag)}</span>`
+    : '';
+};
+
+const tagClass = (tag) => TAG_CLASSES[tag] ?? '';
+
 // The post list is rendered into index.html at build time as well as by home.js
 // at run time. Both produce the same markup; the static copy is what a crawler
 // that does not run JavaScript indexes.
@@ -440,10 +477,10 @@ async function buildIndex(manifest) {
   const indexPath = path.join(ROOT, 'index.html');
   if (!existsSync(indexPath)) return;
   const items = [...manifest].sort(byDateDesc).map((post) => `
-          <li>
+          <li data-tag="${tagClass(post.tag)}">
             <time datetime="${post.date}">${prettyDate(post.date)}</time>
             <div>
-              <a class="post-title" href="${post.url ?? `./post.html?slug=${encodeURIComponent(post.slug)}`}">${escapeHtml(post.title)}</a>
+              <a class="post-title" href="${post.url ?? `./post.html?slug=${encodeURIComponent(post.slug)}`}">${escapeHtml(post.title)}</a>${tagMarkup(post.tag)}
               ${post.summary ? `<p class="post-summary">${escapeHtml(post.summary)}</p>` : ''}
             </div>
           </li>

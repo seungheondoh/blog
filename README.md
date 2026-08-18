@@ -9,8 +9,10 @@ Hand-written interactive posts that ship in more than one language are the one e
 1. Create `posts/YYYY-MM-DD-slug/index.md`. Put any images for that post in the same folder.
 2. Add an entry to `posts.json`:
    ```json
-   { "slug": "YYYY-MM-DD-slug", "title": "...", "date": "YYYY-MM-DD", "tags": ["..."], "summary": "..." }
+   { "slug": "YYYY-MM-DD-slug", "title": "...", "date": "YYYY-MM-DD", "tag": "Study", "summary": "..." }
    ```
+   Use `Study` for learning notes and tutorials, `Article` for analytical or
+   argument-driven writing, and `Essay` for personal reflections.
 3. Commit and push.
 
 The `index.md` body should **not** start with a top-level `# Heading` — the page title comes from `posts.json` and is rendered separately. Start with `##` for in-post subheadings.
@@ -47,6 +49,17 @@ The build fails, rather than shipping a half-translated page, when:
 It also warns about translation entries that no longer match anything, which is how you find stale copy after editing `content.html`.
 
 To edit: change prose in `src/content.html` (source language) or `src/en.mjs` (translation), then rerun `node build.mjs`. Never edit the generated `.html` files — they carry a banner saying so, and the next build overwrites them.
+
+Each generated article shows a collapsed update log below its byline. It starts
+with the publication date automatically. To record later changes, add an
+`updates` array to a locale module:
+
+```js
+updates: [
+  { date: 'YYYY-MM-DD', note: 'Published.' },
+  { date: 'YYYY-MM-DD', note: 'Expanded the examples.' },
+],
+```
 
 ## Search engines
 

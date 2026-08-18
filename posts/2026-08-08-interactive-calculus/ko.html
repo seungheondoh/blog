@@ -72,19 +72,15 @@
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
 
-  <header class="site-header">
-    <a class="brand" href="../../index.html">Blog <span>· Seungheon Doh</span></a>
-    <nav>
-      <a href="https://seungheondoh.github.io/" target="_blank" rel="noopener noreferrer">About</a>
-    </nav>
-  </header>
-
   <main id="main-content" class="la-page">
     <div class="la-hero" id="intro">
       <a class="language-link" href="./index.html" lang="en">English ver.</a>
       <h1>Interactive Calculus</h1>
       <p class="la-meta">Date: <time datetime="2026-08-08">August 8, 2026</time><span class="la-meta-sep">|</span>Estimated Reading Time: 33 min<span class="la-meta-sep">|</span>Author: Seungheon Doh</p>
-      <p class="la-footnote">참고: <a href="https://angeloyeo.github.io/2019/08/25/gradient.html" target="_blank" rel="noopener noreferrer">angeloyeo.github.io</a>의 그래디언트·발산·다중적분 편, 그리고 <a href="https://najeebkhan.github.io//blog/VecCal.html" target="_blank" rel="noopener noreferrer">Najeeb Khan, <em>Vector Calculus</em></a>. 이 글은 <a href="../2026-07-14-linear-algebra/ko.html">Interactive Linear Algebra</a>와 <a href="../2026-07-23-interactive-probability/ko.html">Interactive Probability</a>에 이어지며, 다음 글 <a href="../2026-08-16-ode-and-pde/ko.html">Interactive Differential Equations</a>의 준비편입니다.</p>
+      <details class="update-log">
+        <summary>Update log</summary>
+        <ul><li><time datetime="2026-08-08">August 8, 2026</time><span>최초 게시.</span></li></ul>
+      </details>
       <p class="la-sub">
         <a href="../2026-07-14-linear-algebra/ko.html">선형대수</a>는 데이터를 표현하는 언어였고, <a href="../2026-07-23-interactive-probability/ko.html">확률</a>은 불확실성을 다루는 언어였습니다. 그런데 두 글 모두 한 가지를 당연한 듯 사용했습니다 — <strong>"손실을 최소화한다"</strong>는 말입니다. 파라미터를 어느 방향으로 얼마나 움직여야 손실이 줄어드는지, 그 질문에 답하는 언어가 미적분입니다.
       </p>
@@ -359,7 +355,7 @@
           <p class="definition"><strong>정의.</strong> \(F:\mathbb{R}^n\to\mathbb{R}^m\)의 야코비안은 \((i,j)\) 성분이 \(\partial F_i/\partial x_j\)인 \(m\times n\) 행렬이다. \(m=1\)이면 그래디언트의 전치가 되고, \(n=m=1\)이면 그냥 도함수다 — 야코비안은 미분 개념의 가장 일반적인 형태다.</p>
           <p class="interp"><strong>국소적으로는 모든 것이 선형변환이다.</strong> 한 점 \(a\) 근처에서 \(F(a+\Delta)\approx F(a)+J_F(a)\,\Delta\)다. 즉 <strong>비선형 함수도 아주 가까이서 보면 행렬 하나로 작동한다.</strong> 이것이 이 글 서두의 "충분히 가까이서 보면 모든 것은 직선"을 다차원으로 옮긴 문장이며, <a href="../2026-07-14-linear-algebra/ko.html#transform">선형변환 글</a>에서 본 격자의 변형이 여기서 그대로 재현된다.</p>
           <p class="interp"><strong>연쇄법칙 = 행렬곱.</strong> \(J_{g\circ f}(x)=J_g(f(x))\,J_f(x)\). 역전파는 이 행렬곱의 연쇄인데, 실제 구현은 행렬을 만들지 않는다. 손실이 스칼라이므로 왼쪽부터 벡터-야코비안 곱 \(v^\top J\)를 연달아 취하면 되고, 이 방식(reverse-mode)이 파라미터가 많고 출력이 하나인 딥러닝에 압도적으로 유리하다.</p>
-          <p class="interp"><strong>행렬식: 부피 배율.</strong> \(|\det J|\)는 그 점 근처에서 미소 부피가 몇 배로 변하는지를 말한다. <a href="../2026-07-14-linear-algebra/ko.html#inverse">선형대수 글의 행렬식</a>이 넓이 배율이었던 것과 정확히 같은 의미이며, 다만 점마다 달라진다는 점이 다르다. \(\det J=0\)인 점에서는 국소적으로 차원이 무너져 함수가 역함수를 갖지 못한다.</p>
+          <p class="interp"><strong>행렬식: 부피 배율.</strong> \(|\det J|\)는 그 점 근처에서 미소 부피가 몇 배로 변하는지를 말한다. <a href="../2026-07-14-linear-algebra/ko.html#inverse">선형대수 글의 행렬식</a>이 넓이 배율이었던 것과 정확히 같은 의미이며, 다만 점마다 달라진다는 점이 다르다. \(\det J=0\)인 점에서는 국소적으로 차원이 무너져, 매끄러운 역함수의 존재를 보장할 수 없다(역함수 정리가 적용되지 않는다).</p>
           <p class="interp"><strong>머신러닝에서: 정규화 흐름.</strong> 확률변수를 \(z\mapsto x=F(z)\)로 변환하면 밀도는 \(p_x(x)=p_z(z)\,|\det J_F(z)|^{-1}\)로 바뀐다. 부피가 늘어난 만큼 밀도가 묽어진다는 뜻이다. Normalizing Flow는 \(\det J\)를 값싸게 계산할 수 있도록 \(F\)를 설계(삼각 야코비안, 결합층 등)해 정확한 로그가능도를 얻는 모델군이다. 다음 글의 확률밀도 흐름도 결국 이 관계의 연속시간 버전이다.</p>
           <p class="formula">\[\begin{aligned} (J_F)_{ij} &amp;= \frac{\partial F_i}{\partial x_j}, \qquad J_F \in \mathbb{R}^{m\times n} \\ F(a+\Delta) &amp;\approx F(a) + J_F(a)\,\Delta \\ J_{g\circ f} &amp;= J_g\,J_f \\ p_x(x) &amp;= p_z(z)\,\bigl|\det J_F(z)\bigr|^{-1} \end{aligned}\]</p>
           <p class="hint">왼쪽 격자 위의 점을 드래그하면 오른쪽에 그 점이 어디로 옮겨지는지, 그리고 그 <strong>주변의 작은 정사각형이 어떤 평행사변형으로 변형되는지</strong>가 그려집니다. 그 평행사변형의 넓이 비율이 곧 |det J|입니다. 변환을 바꿔가며 늘어나는 곳과 접히는 곳(det J = 0)을 찾아보세요.</p>
@@ -417,7 +413,7 @@
           <p class="interp"><strong>흐름선.</strong> 각 점에서 화살표 방향으로 계속 따라가며 그린 곡선이 흐름선(streamline)이고, 이것이 미분방정식 \(\dot{x}=F(x)\)의 해다. 즉 <strong>벡터장을 그리는 것과 미분방정식을 세우는 것은 같은 일이다.</strong> 오른쪽에서 아무 곳이나 클릭하면 그 점에서 출발한 흐름선이 그려진다.</p>
           <p class="interp"><strong>머신러닝에서.</strong> 학습 동역학 자체가 벡터장 위의 흐름이다. 학습률을 0으로 보낸 극한에서 경사하강은 \(\dot\theta=-\nabla L(\theta)\)라는 미분방정식(경사흐름)이 된다. Neural ODE는 신경망 자체를 벡터장으로 두어 \(\dot{h}=f_\theta(h,t)\)를 풀고, 확산 모델의 역과정과 Probability Flow ODE도 학습된 벡터장을 따라 노이즈를 데이터로 옮기는 흐름이다.</p>
           <p class="formula">\[\begin{aligned} F &amp;: \mathbb{R}^n \to \mathbb{R}^n \\ \dot{x} &amp;= F(x) \quad \text{(흐름선이 곧 해)} \\ \dot\theta &amp;= -\nabla L(\theta) \quad \text{(경사흐름)} \end{aligned}\]</p>
-          <p class="hint">프리셋으로 여러 벡터장을 비교해보세요. 그림 아무 곳이나 클릭하면 그 점에서 출발한 흐름선이 그려집니다. <strong>그래디언트장에서는 흐름선이 등고선을 가로지르며 반드시 어딘가로 수렴</strong>하지만, 회전장에서는 영원히 맴돕니다 — 이 차이가 다음 절 발산·회전의 주제입니다.</p>
+          <p class="hint">프리셋으로 여러 벡터장을 비교해보세요. 그림 아무 곳이나 클릭하면 그 점에서 출발한 흐름선이 그려집니다. <strong>그래디언트장에서는 흐름선이 등고선을 가로지르며 반드시 어딘가로 수렴</strong>하지만, 회전장에서는 영원히 맴돕니다 — 이 차이가 다음 절 발산의 주제입니다.</p>
         </div>
         <div class="topic-demo">
           <div class="controls preset-row" id="vf-presets">
@@ -487,6 +483,8 @@
       </div>
     </section>
 
+
+      <p class="la-footnote">참고: <a href="https://angeloyeo.github.io/2019/08/25/gradient.html" target="_blank" rel="noopener noreferrer">angeloyeo.github.io</a>의 그래디언트·발산·다중적분 편, 그리고 <a href="https://najeebkhan.github.io//blog/VecCal.html" target="_blank" rel="noopener noreferrer">Najeeb Khan, <em>Vector Calculus</em></a>. 이 글은 <a href="../2026-07-14-linear-algebra/ko.html">Interactive Linear Algebra</a>와 <a href="../2026-07-23-interactive-probability/ko.html">Interactive Probability</a>에 이어지며, 다음 글 <a href="../2026-08-16-ode-and-pde/ko.html">Interactive Differential Equations</a>의 준비편입니다.</p>
         <a class="back-link" href="../../index.html">&larr; Back to all posts</a>
       </div>
     </div>
@@ -494,7 +492,6 @@
 
   <footer class="site-footer">
     <p>© <span id="current-year">2026</span> Seungheon Doh</p>
-    <a href="https://seungheondoh.github.io/" target="_blank" rel="noopener noreferrer">seungheondoh.github.io</a>
   </footer>
 
   <script src="../../js/common.js"></script>

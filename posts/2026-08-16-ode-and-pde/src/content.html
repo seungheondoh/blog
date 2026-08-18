@@ -2,7 +2,6 @@
       <a class="language-link" href="./index.html" lang="en">English ver.</a>
       <h1>Basic Definition of differential equations</h1>
       <p class="la-meta"><time datetime="2026-08-16">2026.08.16</time></p>
-      <p class="la-footnote">참고: Fu &amp; Wang, <em>A Tutorial on Diffusion Theory: From Differential Equations to Diffusion Models</em> (INSAIT), 그리고 <a href="https://najeebkhan.github.io//blog/ODE.html" target="_blank" rel="noopener noreferrer">Najeeb Khan, <em>On Differential Equations</em></a>. 준비편은 <a href="../2026-08-08-interactive-calculus/ko.html">Interactive Calculus</a>이며, 이어지는 글은 <a href="../2026-08-16-sde-and-diffusion/ko.html">Interactive Stochastic Differential Equations</a>입니다.</p>
       <!-- intro:start -->
       <p class="la-sub">
         <a href="../2026-08-08-interactive-calculus/ko.html">앞 글</a>의 마지막 장면을 떠올려 봅시다. 공간의 각 점에 화살표가 하나씩 붙어 있고, 아무 곳이나 클릭하면 그 화살표를 따라가는 곡선이 그려졌습니다. <strong>그 곡선이 바로 미분방정식의 해입니다.</strong> 미분방정식이란 "지금 위치에서 어느 쪽으로 얼마나 빨리 움직여야 하는가"만 알려주는 규칙이고, 해는 그 규칙에 순종해 그려진 궤적입니다.
@@ -45,11 +44,11 @@
       <p class="topic-lead">미지수가 수가 아니라 함수인 방정식이다. 함수 자체가 아니라 그 함수의 변화율에 대한 조건이 주어지고, 우리는 그 조건을 만족하는 함수를 찾는다.</p>
       <div class="topic-body">
         <div class="topic-text">
-          <p class="definition"><strong>정의.</strong> 상미분방정식(ODE)은 미지 함수 \(x(t)\)와 그 도함수들 사이의 관계식이다. 가장 흔한 1계 형태는 \(\frac{dx}{dt}=f(t,x)\)이며, 최고차 도함수의 차수를 그 방정식의 <em>계수(order)</em>라 한다. "상(ordinary)"은 독립변수가 하나뿐이라는 뜻으로, 변수가 여럿이면 편미분방정식이 된다.</p>
+          <p class="definition"><strong>정의.</strong> 상미분방정식(ODE)은 미지 함수 \(x(t)\)와 그 도함수들 사이의 관계식이다. 가장 흔한 1계 형태는 \(\frac{dx}{dt}=f(t,x)\)이며, 가장 높은 도함수의 미분 횟수를 그 방정식의 <em>계(order)</em>라 한다. "상(ordinary)"은 독립변수가 하나뿐이라는 뜻으로, 변수가 여럿이면 편미분방정식이 된다.</p>
           <p class="interp"><strong>방정식이지만 답이 함수다.</strong> \(x^2-4=0\)의 답은 수 \(\pm 2\)지만, \(\dot{x}=2x\)의 답은 함수 \(x(t)=Ce^{2t}\)다. 게다가 상수 \(C\)마다 하나씩, <strong>해가 하나가 아니라 함수의 무리</strong>다. 오른쪽 그림에서 여러 곡선이 동시에 그려지는 것이 그 때문이며, 그중 하나를 고르려면 다음 절의 초기조건이 필요하다.</p>
           <p class="interp"><strong>국소 규칙이 전역 궤적을 만든다.</strong> \(f(t,x)\)는 각 점에서의 <em>기울기</em>만 알려준다. 그 기울기를 짧은 선분으로 평면에 촘촘히 그린 것을 기울기장(direction field)이라 하고, 해곡선은 이 선분들에 매 순간 접하며 지나가는 곡선이다. 방정식을 <em>푸는</em> 법을 몰라도 해가 어떤 모양일지는 이 그림만으로 읽어낼 수 있다는 점이 중요하다.</p>
           <p class="interp"><strong>어디서 나오는가.</strong> 뉴턴의 제2법칙 \(m\ddot{x}=F\)가 2계 ODE이고, 개체군 모형 \(\dot{P}=kP\)는 "증가 속도가 현재 개체수에 비례한다"를 그대로 옮긴 1계 ODE다. 물리·화학·생물·경제에서 "변화율"이라는 말이 나오는 순간 미분방정식이 세워진다.</p>
-          <p class="interp"><strong>머신러닝에서.</strong> 학습률을 0으로 보낸 극한에서 경사하강법은 \(\dot\theta=-\nabla L(\theta)\)라는 ODE가 된다(경사흐름). Neural ODE는 신경망 자체를 \(f\)로 두어 \(\dot{h}=f_\theta(h,t)\)를 풀고, 그 해를 층 대신 사용한다. 그리고 이 글의 종착지인 확산 모델의 생성 과정도 결국 학습된 ODE 하나를 푸는 일이다.</p>
+          <p class="interp"><strong>머신러닝에서.</strong> 학습률을 0으로 보낸 극한에서 경사하강법은 \(\dot\theta=-\nabla L(\theta)\)라는 ODE가 된다(경사흐름). Neural ODE는 신경망 자체를 \(f\)로 두어 \(\dot{h}=f_\theta(h,t)\)를 풀고, 그 해를 층 대신 사용한다. 그리고 확산 모델의 생성 과정도 결국 학습된 ODE 하나를 푸는 일이다.</p>
           <p class="formula">\[\begin{aligned} \frac{dx}{dt} &amp;= f(t, x) \\ \dot{x} = 2x &amp;\;\Rightarrow\; x(t) = C e^{2t} \\ m\ddot{x} &amp;= F, \qquad \dot{P} = kP \end{aligned}\]</p>
           <p class="hint">프리셋으로 방정식을 바꿔보세요. 배경의 짧은 선분들이 기울기장이고, 색색의 곡선이 서로 다른 상수 C에 대응하는 해입니다. <strong>모든 해곡선이 자기 위치의 선분에 정확히 접한다</strong>는 점을 확인해보세요 — 방정식이 말하는 것은 그것뿐입니다.</p>
         </div>
@@ -235,7 +234,7 @@
           <p class="interp"><strong>군 구조.</strong> 흐름은 \(\Phi_0=\mathrm{id}\)이고 \(\Phi_s\circ\Phi_t=\Phi_{s+t}\)를 만족한다 — \(t\)만큼 흘린 뒤 \(s\)만큼 더 흘리는 것은 \(s+t\)만큼 흘리는 것과 같다. 따라서 \(\Phi_t^{-1}=\Phi_{-t}\)로, <strong>모든 흐름은 시간을 거꾸로 돌려 되돌릴 수 있다.</strong> 이 가역성이 이 글 전체에서 반복해 쓰인다.</p>
           <p class="interp"><strong>부피는 어떻게 변하는가.</strong> 흐름을 따라 옮겨진 영역의 부피는 <a href="../2026-08-08-interactive-calculus/ko.html#divergence">발산</a>이 지배한다: \(\frac{d}{dt}\log V=\nabla\cdot f\). 발산이 0인 벡터장(비압축성)은 부피를 정확히 보존하고, 양이면 팽창시키며, 음이면 수축시킨다. 오른쪽에서 사각형 하나가 흐름을 따라 변형되는 모습으로 이것을 볼 수 있다.</p>
           <p class="interp"><strong>머신러닝에서: Neural ODE.</strong> \(f\)를 신경망으로 두면 \(\Phi_1\)이 하나의 층처럼 작동한다. ResNet의 \(h_{n+1}=h_n+f_\theta(h_n)\)이 정확히 \(\Delta t=1\)인 오일러 한 걸음이라는 관찰이 출발점이었다 — <strong>잔차 연결은 이산화된 흐름이었던 셈이다.</strong> 층 수 대신 적분 구간과 솔버 정밀도가 계산량을 정하고, 메모리는 층 수와 무관해진다(수반법).</p>
-          <p class="interp"><strong>연속 정규화 흐름.</strong> 흐름이 가역이므로 확률변수를 흘려보내 분포를 변환할 수 있다. 이때 로그밀도는 \(\frac{d\log p}{dt}=-\nabla\cdot f\)를 따르는데, <a href="../2026-08-08-interactive-calculus/ko.html#jacobian">야코비안 행렬식</a> 대신 <strong>대각합만 계산하면 된다</strong>는 점이 결정적이다. 마지막 절의 Probability Flow ODE가 정확히 이 구조를 갖는다.</p>
+          <p class="interp"><strong>연속 정규화 흐름.</strong> 흐름이 가역이므로 확률변수를 흘려보내 분포를 변환할 수 있다. 이때 로그밀도는 \(\frac{d\log p}{dt}=-\nabla\cdot f\)를 따르는데, <a href="../2026-08-08-interactive-calculus/ko.html#jacobian">야코비안 행렬식</a> 대신 <strong>대각합만 계산하면 된다</strong>는 점이 결정적이다. 확산 모델의 Probability Flow ODE가 정확히 이 구조를 갖는다.</p>
           <p class="formula">\[\begin{aligned} \Phi_t &amp;: x_0 \mapsto x(t) \\ \Phi_s\circ\Phi_t &amp;= \Phi_{s+t}, \qquad \Phi_t^{-1} = \Phi_{-t} \\ \frac{d}{dt}\log V &amp;= \nabla\cdot f, \qquad \frac{d\log p}{dt} = -\nabla\cdot f \end{aligned}\]</p>
           <p class="hint">시간 t를 움직이면 격자 전체와 그 안의 사각형이 흐름을 따라 변형됩니다. <strong>발산이 0인 장에서는 사각형이 찌그러져도 넓이가 유지</strong>되고, 수축하는 장에서는 넓이가 줄어듭니다. t를 음수로 돌리면 정확히 원래 자리로 돌아온다는 점 — 흐름의 가역성입니다.</p>
         </div>
@@ -265,7 +264,7 @@
           <p class="interp"><strong>ODE와 무엇이 다른가.</strong> ODE의 해는 곡선 하나지만 PDE의 해는 <strong>함수 전체가 시간에 따라 변형되는 것</strong>이다. ODE가 "점 하나의 운동"이라면 PDE는 "모양 전체의 진화"다. 그래서 초기조건도 값 하나가 아니라 초기 함수 \(u(0,x)\) 전체이고, 공간이 유한하면 경계조건까지 필요하다.</p>
           <p class="interp"><strong>세 가지 원형.</strong> 2계 선형 PDE는 크게 셋으로 분류된다. <strong>포물형</strong>(열방정식 \(u_t=\alpha u_{xx}\))은 매끄럽게 만들고 정보를 잃으며 시간을 거꾸로 돌리기 어렵다. <strong>쌍곡형</strong>(파동방정식 \(u_{tt}=c^2u_{xx}\), 수송방정식)은 모양을 유지한 채 유한한 속도로 전파하며 가역적이다. <strong>타원형</strong>(라플라스 방정식 \(\Delta u=0\))은 시간이 없는 평형 상태를 기술한다. 이 글에서 만날 것은 앞의 둘과 그 조합이다.</p>
           <p class="interp"><strong>대부분 손으로 풀 수 없다.</strong> ODE보다 훨씬 심하다. 그래서 실무에서는 공간을 격자로 잘라 편미분을 차분으로 바꾸고, 결과로 나온 거대한 ODE 계를 시간에 대해 적분한다(선의 방법). 오른쪽 데모들이 정확히 이 방식으로 계산된다.</p>
-          <p class="interp"><strong>머신러닝에서.</strong> 이 글의 주인공인 <strong>Fokker–Planck 방정식</strong>이 PDE이며, 확률밀도가 시간에 따라 어떻게 변형되는지를 기술한다. 확산 모델을 이해한다는 것은 결국 이 PDE와 그것을 만들어내는 SDE의 관계를 이해하는 일이다. 한편 물리 방정식 자체를 신경망으로 푸는 PINN·Neural Operator 계열도 활발한 분야다.</p>
+          <p class="interp"><strong>머신러닝에서.</strong> 확산 모델의 핵심인 <strong>Fokker–Planck 방정식</strong>이 PDE이며, 확률밀도가 시간에 따라 어떻게 변형되는지를 기술한다. 확산 모델을 이해한다는 것은 결국 이 PDE와 그것을 만들어내는 SDE의 관계를 이해하는 일이다. 한편 물리 방정식 자체를 신경망으로 푸는 PINN·Neural Operator 계열도 활발한 분야다.</p>
           <p class="formula">\[\begin{aligned} \frac{\partial u}{\partial t} &amp;= \alpha\frac{\partial^2 u}{\partial x^2} &amp;&amp;\text{포물형 (확산)} \\ \frac{\partial u}{\partial t} + c\frac{\partial u}{\partial x} &amp;= 0 &amp;&amp;\text{쌍곡형 (수송)} \\ \Delta u &amp;= 0 &amp;&amp;\text{타원형 (평형)} \end{aligned}\]</p>
           <p class="hint">같은 초기 모양에 세 방정식을 각각 적용해 비교해보세요. <strong>수송은 모양을 그대로 옮기고, 확산은 뭉개며, 파동은 좌우로 갈라집니다.</strong> 시간 슬라이더를 되돌려보면 확산만 정보를 잃어 원래 모양을 복원하지 못한다는 점이 드러납니다.</p>
         </div>
@@ -295,7 +294,7 @@
         <div class="topic-text">
           <p class="definition"><strong>정의.</strong> \(\frac{\partial u}{\partial t}+c\frac{\partial u}{\partial x}=0\). 상수 속도 \(c\)의 경우 해는 \(u(t,x)=u_0(x-ct)\)로, <strong>초기 모양을 오른쪽으로 \(ct\)만큼 민 것</strong>이다. 모양은 조금도 변하지 않는다.</p>
           <p class="interp"><strong>특성곡선.</strong> 왜 그런지는 관찰자를 흐름에 태워보면 알 수 있다. \(x(t)=x_0+ct\)를 따라 움직이며 \(u\)를 보면 \(\frac{d}{dt}u(t,x(t))=u_t+c\,u_x=0\)이므로 <strong>그 관찰자에게 \(u\)는 상수다.</strong> 이런 곡선을 특성곡선이라 하고, PDE가 특성곡선을 따라 ODE로 환원되는 이 구조가 쌍곡형 방정식의 핵심이다.</p>
-          <p class="interp"><strong>속도가 위치에 따라 다르면.</strong> \(c=c(x)\)면 특성곡선이 휘고, 모양이 늘어나거나 압축된다. 특성곡선끼리 충돌하면(빠른 뒤쪽이 느린 앞쪽을 따라잡으면) 해가 다치기(shock) 시작하는데, 이것이 비선형 보존법칙의 어려움이다.</p>
+          <p class="interp"><strong>속도가 위치에 따라 다르면.</strong> \(c=c(x)\)면 특성곡선이 휘고, 모양이 늘어나거나 압축된다. 특성곡선끼리 충돌하면(빠른 뒤쪽이 느린 앞쪽을 따라잡으면) 해가 부서지기(shock) 시작하는데, 이것이 비선형 보존법칙의 어려움이다.</p>
           <p class="interp"><strong>정보를 잃지 않는다.</strong> 수송은 완전히 가역적이다. \(c\)의 부호를 뒤집어 같은 시간만큼 흘리면 정확히 원래 모양으로 돌아온다. 다음 절의 확산과 대비되는 결정적 성질이며, 이 차이가 마지막 절에서 "결정론적 생성이 가능한가"라는 질문으로 되돌아온다.</p>
           <p class="interp"><strong>머신러닝에서.</strong> 수송방정식은 다음 절 연속방정식의 특수한 경우(밀도가 보존되고 속도장이 일정한 경우)다. 그리고 <strong>Flow Matching</strong>이 하는 일이 정확히 이것의 일반화다 — 데이터 분포를 목표 분포로 실어 나르는 속도장을 학습한다. 최적수송(optimal transport) 이론과 생성 모델이 만나는 지점이기도 하다.</p>
           <p class="formula">\[\begin{aligned} \frac{\partial u}{\partial t} + c\frac{\partial u}{\partial x} &amp;= 0 \\ u(t,x) &amp;= u_0(x - ct) \\ \frac{dx}{dt} = c &amp;\;\Rightarrow\; u \text{ 는 그 곡선 위에서 상수} \end{aligned}\]</p>
@@ -325,7 +324,7 @@
           <p class="interp"><strong>왜 발산인가.</strong> 작은 상자를 하나 생각하자. 상자 안의 총량이 줄어드는 유일한 방법은 경계로 흘러나가는 것뿐이다. 경계를 통한 알짜 유출량이 바로 <a href="../2026-08-08-interactive-calculus/ko.html#divergence">발산</a> \(\nabla\cdot j\)였으므로, 보존은 곧 \(\partial_t\rho=-\nabla\cdot j\)가 된다. 앞 글의 "샘과 싱크" 그림이 여기서 물리적 의미를 얻는다.</p>
           <p class="interp"><strong>총량은 항상 보존된다.</strong> 전체 공간에 대해 적분하면 발산 항이 (경계에서 사라진다는 가정 아래) 0이 되어 \(\frac{d}{dt}\int\rho\,dx=0\)이다. <strong>확률밀도에 적용하면 "전체 확률은 언제나 1"이라는 뜻</strong>이 된다 — <a href="../2026-07-23-interactive-probability/ko.html#distribution">확률 글</a>의 정규화 조건이 동역학 아래에서도 자동으로 유지되는 이유다.</p>
           <p class="interp"><strong>수송방정식과의 관계.</strong> \(v\)가 상수이고 \(\nabla\cdot v=0\)이면 \(\nabla\cdot(\rho v)=v\cdot\nabla\rho\)가 되어 앞 절의 수송방정식으로 환원된다. 반대로 \(v\)가 위치에 따라 변하면 밀도가 압축되거나 희박해지는 항이 추가로 생긴다.</p>
-          <p class="interp"><strong>머신러닝에서: 여기가 다리다.</strong> 입자들이 ODE \(\dot{x}=v(x)\)를 따라 움직일 때 그 입자들의 밀도는 정확히 이 연속방정식을 따른다. <strong>즉 "궤적의 언어"와 "밀도의 언어"를 잇는 사전이 연속방정식이다.</strong> 세 절 뒤의 "입자에서 밀도로"에서 이것을 직접 확인하고, 마지막 절의 Probability Flow ODE는 이 관계를 거꾸로 이용한다 — 원하는 밀도 변화를 주고 그것을 만들어내는 속도장을 찾는 것이다.</p>
+          <p class="interp"><strong>머신러닝에서: 여기가 다리다.</strong> 입자들이 ODE \(\dot{x}=v(x)\)를 따라 움직일 때 그 입자들의 밀도는 정확히 이 연속방정식을 따른다. <strong>즉 "궤적의 언어"와 "밀도의 언어"를 잇는 사전이 연속방정식이다.</strong> "입자에서 밀도로" 절에서 이것을 직접 확인하고, 확산 모델의 Probability Flow ODE는 이 관계를 거꾸로 이용한다 — 원하는 밀도 변화를 주고 그것을 만들어내는 속도장을 찾는 것이다.</p>
           <p class="formula">\[\begin{aligned} \frac{\partial \rho}{\partial t} + \nabla\cdot(\rho v) &amp;= 0 \\ j &amp;= \rho v \quad \text{(플럭스)} \\ \frac{d}{dt}\int \rho\,dx &amp;= 0 \quad \text{(총량 보존)} \end{aligned}\]</p>
           <p class="hint">속도장을 바꿔가며 재생해보세요. 밀도(파랑)가 속도장을 따라 실려가며 <strong>수렴하는 곳에서는 쌓이고 발산하는 곳에서는 옅어집니다.</strong> 아래 막대가 총 질량인데, 모양이 아무리 변해도 <strong>언제나 1로 유지</strong>되는 것을 확인해보세요.</p>
         </div>
@@ -353,9 +352,9 @@
         <div class="topic-text">
           <p class="definition"><strong>정의.</strong> \(\frac{\partial u}{\partial t}=\alpha\,\Delta u\). \(u\)가 온도면 열방정식, 농도나 확률밀도면 확산방정식이라 부르지만 <strong>수학적으로 완전히 같은 식</strong>이다. \(\alpha&gt;0\)는 확산계수다.</p>
           <p class="interp"><strong>라플라시안이 하는 일.</strong> <a href="../2026-08-08-interactive-calculus/ko.html#laplacian">앞 글</a>에서 라플라시안은 "이 점의 값이 주변 평균보다 얼마나 낮은가"였다. 그러니 이 방정식은 <strong>"주변보다 낮으면 올라가고 높으면 내려간다"</strong>를 그대로 옮긴 것이다. 봉우리는 깎이고 골은 메워지며, 시간이 충분히 지나면 전부 평평해진다.</p>
-          <p class="interp"><strong>기본해는 가우시안이다.</strong> 초기 조건이 한 점에 몰린 델타 함수라면 해는 \(u(t,x)=\frac{1}{\sqrt{4\pi\alpha t}}e^{-x^2/4\alpha t}\)로, <strong>분산이 \(2\alpha t\)로 선형 증가하는 가우시안</strong>이다. 폭이 \(\sqrt{t}\)에 비례해 퍼진다는 이 사실이 뒤에서 브라운 운동을 만날 때 그대로 재등장한다 — 우연이 아니라 같은 현상의 두 얼굴이다.</p>
+          <p class="interp"><strong>기본해는 가우시안이다.</strong> 초기 조건이 한 점에 몰린 델타 함수라면 해는 \(u(t,x)=\frac{1}{\sqrt{4\pi\alpha t}}e^{-x^2/4\alpha t}\)로, <strong>분산이 \(2\alpha t\)로 선형 증가하는 가우시안</strong>이다. 폭이 \(\sqrt{t}\)에 비례해 퍼진다는 이 사실이 브라운 운동에서 그대로 재등장한다 — 우연이 아니라 같은 현상의 두 얼굴이다.</p>
           <p class="interp"><strong>왜 잔주름이 먼저 사라지는가.</strong> 라플라시안이 "주변 평균과의 차이"였다는 것을 떠올리면 이유가 바로 보인다. 같은 높이의 물결이라도 <em>촘촘한</em> 물결은 봉우리에서 골까지 가는 거리가 짧아 훨씬 급하게 휘어 있고, 곧 주변 평균과의 차이가 크다. 차이가 크면 그만큼 빨리 깎이므로, 잔주름은 순식간에 뭉개지고 완만한 큰 굴곡만 오래 남는다. 이 직관을 수식으로 확인하면 파수 \(k\)인 성분 \(\sin kx\)의 2차 미분이 \(-k^2\sin kx\)이므로 감쇠율이 \(k^2\)에 비례하고, 따라서 \(e^{-\alpha k^2 t}\)로 죽는다 — <strong>주파수가 2배면 감쇠는 4배 빠르다.</strong> 사진에 가우시안 블러를 걸면 미세한 질감이 먼저 날아가고 큰 덩어리 형태는 남는 것이 같은 현상이다.</p>
-          <p class="interp"><strong>비가역적이다.</strong> 확산은 정보를 파괴한다. 고주파 성분일수록 빠르게(파수 \(k\)에 대해 \(e^{-\alpha k^2 t}\)로) 사라지므로, 시간이 조금만 지나도 세부 구조는 복원 불가능해진다. 시간을 거꾸로 돌린 방정식 \(u_t=-\alpha\Delta u\)는 고주파가 폭발해 수치적으로 다룰 수 없다. <strong>그런데 확산 모델은 바로 이 "역방향 확산"을 해낸다</strong> — 어떻게 가능한지가 이 글 후반부의 이야기다(답을 미리 말하면, 데이터 분포에 대한 추가 정보인 <em>스코어</em>를 학습하기 때문이다).</p>
+          <p class="interp"><strong>비가역적이다.</strong> 확산은 정보를 파괴한다. 고주파 성분일수록 빠르게(파수 \(k\)에 대해 \(e^{-\alpha k^2 t}\)로) 사라지므로, 시간이 조금만 지나도 세부 구조는 복원 불가능해진다. 시간을 거꾸로 돌린 방정식 \(u_t=-\alpha\Delta u\)는 고주파가 폭발해 수치적으로 다룰 수 없다. <strong>그런데 확산 모델은 바로 이 "역방향 확산"을 해낸다</strong> — 데이터 분포에 대한 추가 정보인 <em>스코어</em>를 학습하기 때문에 가능한 일이다.</p>
           <p class="interp"><strong>머신러닝에서.</strong> 확산 모델의 순방향 과정은 데이터 분포를 이 방정식에 따라 뭉개 가우시안으로 만드는 것이다. 이미지 처리의 가우시안 블러가 열방정식을 짧은 시간 푼 것이고, 그래프 위에서는 <a href="../2026-08-08-interactive-calculus/ko.html#laplacian">그래프 라플라시안</a>에 의한 확산이 GNN의 메시지 전달과 over-smoothing 현상으로 나타난다.</p>
           <p class="formula">\[\begin{aligned} \frac{\partial u}{\partial t} &amp;= \alpha\,\Delta u \\ u(t,x) &amp;= \tfrac{1}{\sqrt{4\pi\alpha t}}e^{-x^2/(4\alpha t)} \quad \text{(점 초기조건)} \\ \hat{u}(t,k) &amp;= \hat{u}_0(k)\,e^{-\alpha k^2 t} \quad \text{(고주파가 먼저 죽는다)} \end{aligned}\]</p>
           <p class="hint">재생하면 뾰족한 봉우리들이 먼저 무너지고 이어서 넓은 구조가 사라집니다. 아래 주파수 그래프에서 <strong>높은 주파수가 지수적으로 빠르게 죽는 것</strong>이 보입니다 — 이것이 확산이 비가역인 이유이고, 되감기로 원래 모양이 복원되지 않는 이유입니다.</p>
@@ -383,7 +382,7 @@
           <p class="definition"><strong>두 서술.</strong> <strong>라그랑주 관점</strong>은 입자를 따라다닌다: \(\dot{x}_i=v(x_i,t)\). <strong>오일러 관점</strong>은 고정된 자리에서 지나가는 것을 센다: \(\partial_t\rho+\nabla\cdot(\rho v)=0\). 같은 물리를 기술하지만 미지수가 각각 궤적과 밀도로 다르다.</p>
           <p class="interp"><strong>번역 규칙.</strong> \(N\)개의 입자를 속도장 \(v\)를 따라 움직이면, 그 경험분포는 \(N\to\infty\)에서 연속방정식의 해로 수렴한다. 반대로 밀도가 주어지면 입자를 그 밀도에서 뽑아 흘려보내면 된다. 오른쪽 데모에서 위쪽 점 구름(입자)과 아래쪽 곡선(밀도)이 <strong>같은 속도장 아래에서 함께 움직이며</strong> 서로 일치하는 것을 볼 수 있다.</p>
           <p class="interp"><strong>왜 두 언어가 다 필요한가.</strong> 밀도는 계 전체의 완전한 정보를 담지만 고차원에서 저장·계산이 불가능하다(<a href="../2026-07-23-interactive-probability/ko.html#joint">결합분포의 차원 저주</a>와 같은 문제다). 입자는 고차원에서도 다룰 수 있지만 유한 표본이라 잡음이 있다. <strong>이론은 밀도로 세우고 계산은 입자로 한다</strong>는 것이 실무의 전략이며, 확산 모델이 정확히 그렇게 작동한다 — Fokker–Planck로 정당화하고 샘플 경로로 실행한다.</p>
-          <p class="interp"><strong>결정론이어도 밀도는 퍼진다.</strong> 개별 입자가 무작위성 없이 움직여도, 속도장이 발산을 가지면 밀도는 퍼지거나 모인다. 즉 <em>밀도의 확산이 반드시 무작위성에서 오는 것은 아니다.</em> 이 관찰이 마지막 절 Probability Flow ODE의 씨앗이다 — 무작위한 SDE와 똑같은 밀도 변화를 결정론적 ODE로 재현할 수 있는 이유가 여기에 있다.</p>
+          <p class="interp"><strong>결정론이어도 밀도는 퍼진다.</strong> 개별 입자가 무작위성 없이 움직여도, 속도장이 발산을 가지면 밀도는 퍼지거나 모인다. 즉 <em>밀도의 확산이 반드시 무작위성에서 오는 것은 아니다.</em> 이 관찰이 확산 모델 Probability Flow ODE의 씨앗이다 — 무작위한 SDE와 똑같은 밀도 변화를 결정론적 ODE로 재현할 수 있는 이유가 여기에 있다.</p>
           <p class="interp"><strong>머신러닝에서.</strong> 생성 모델은 이 번역을 양방향으로 쓴다. 학습할 때는 밀도(가능도, 스코어)를 다루고, 샘플링할 때는 입자(하나의 경로)를 흘려보낸다. Flow Matching은 원하는 밀도 경로를 먼저 정하고 그것을 실현하는 속도장을 회귀로 학습하는데, 이것이 가능한 근거가 바로 이 절의 대응이다.</p>
           <p class="formula">\[\begin{aligned} \dot{x}_i &amp;= v(x_i, t) &amp;&amp;\text{(입자, 라그랑주)} \\ \frac{\partial\rho}{\partial t} + \nabla\cdot(\rho v) &amp;= 0 &amp;&amp;\text{(밀도, 오일러)} \\ \hat\rho_N = \tfrac{1}{N}\textstyle\sum_i \delta_{x_i} &amp;\;\xrightarrow{N\to\infty}\; \rho \end{aligned}\]</p>
           <p class="hint">입자 수 N을 늘리며 재생해보세요. 위쪽 입자들의 히스토그램이 아래쪽 연속방정식 해(주황)에 <strong>점점 겹쳐집니다.</strong> N이 작으면 울퉁불퉁하지만 커질수록 매끄러워지는 것 — <a href="../2026-07-23-interactive-probability/ko.html#sampling">확률 글의 샘플링</a>에서 본 수렴이 여기서 동역학과 만납니다.</p>
@@ -401,6 +400,8 @@
       </div>
     </section>
 
+
+      <p class="la-footnote">참고: Fu &amp; Wang, <em>A Tutorial on Diffusion Theory: From Differential Equations to Diffusion Models</em> (INSAIT), 그리고 <a href="https://najeebkhan.github.io//blog/ODE.html" target="_blank" rel="noopener noreferrer">Najeeb Khan, <em>On Differential Equations</em></a>. 준비편은 <a href="../2026-08-08-interactive-calculus/ko.html">Interactive Calculus</a>이며, 이어지는 글은 <a href="../2026-08-16-sde-and-diffusion/ko.html">Interactive Stochastic Differential Equations</a>입니다.</p>
         <a class="back-link" href="../../index.html">&larr; Back to all posts</a>
       </div>
     </div>

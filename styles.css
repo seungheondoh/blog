@@ -63,7 +63,8 @@ main,
   color: var(--ink);
 }
 
-.site-header .brand:hover { text-decoration: none; }
+.site-header .brand a { color: inherit; }
+.site-header .brand-home:hover { text-decoration: none; }
 .site-header .brand span { color: var(--muted); font-weight: 400; }
 
 .site-header nav a {
@@ -83,6 +84,53 @@ h1 {
 
 /* --- Post list (index.html) --- */
 
+.post-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  margin: 0;
+}
+
+.post-filter {
+  --tag-color: var(--muted);
+  padding: .12rem .38rem;
+  background: var(--tag-color);
+  border: 0;
+  border-radius: 3px;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: .65rem;
+  font-weight: 400;
+  letter-spacing: .025em;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.post-filter:hover {
+  color: #fff;
+  opacity: .78;
+}
+
+.post-filter[aria-pressed="true"] {
+  box-shadow: 0 0 0 1px #fff, 0 0 0 2px var(--ink);
+  color: #fff;
+}
+
+.post-filter--study { --tag-color: #e8a519; }
+.post-filter--article { --tag-color: #204b8c; }
+.post-filter--essay { --tag-color: #cd3318; }
+
+.post-filter:focus-visible {
+  outline: 2px solid rgb(6 69 173 / 35%);
+  outline-offset: 2px;
+}
+
+.filter-empty {
+  margin: 0;
+  color: var(--muted);
+}
+
 #post-list {
   margin: 0;
   padding: 0;
@@ -100,6 +148,8 @@ h1 {
   align-items: baseline;
 }
 
+#post-list li[hidden] { display: none; }
+
 #post-list time {
   color: var(--muted);
   font-variant-numeric: tabular-nums;
@@ -114,6 +164,26 @@ h1 {
 
 .post-title:hover { color: var(--link); }
 
+.post-tag {
+  --tag-color: var(--muted);
+  display: inline-block;
+  margin-left: .5rem;
+  padding: .12rem .38rem;
+  background: var(--tag-color);
+  border-radius: 3px;
+  color: #fff;
+  font-size: .65rem;
+  font-weight: 400;
+  letter-spacing: .025em;
+  line-height: 1.25;
+  vertical-align: .1rem;
+  white-space: nowrap;
+}
+
+.post-tag--study { --tag-color: #e8a519; }
+.post-tag--article { --tag-color: #204b8c; }
+.post-tag--essay { --tag-color: #cd3318; }
+
 .post-summary {
   margin: .2rem 0 0;
   color: var(--muted);
@@ -121,6 +191,34 @@ h1 {
 }
 
 .empty { color: var(--muted); }
+
+.update-log {
+  margin: .45rem 0 1.35rem;
+  color: var(--muted);
+  font-size: .75rem;
+}
+
+.update-log summary {
+  width: fit-content;
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.update-log ul {
+  display: grid;
+  gap: .25rem;
+  margin: .45rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.update-log li {
+  display: grid;
+  grid-template-columns: 7.2rem minmax(0, 1fr);
+  gap: .65rem;
+}
+
+.update-log time { font-variant-numeric: tabular-nums; }
 
 /* --- Post page (post.html) --- */
 

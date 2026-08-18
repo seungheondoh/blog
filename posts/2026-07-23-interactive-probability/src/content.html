@@ -1,8 +1,7 @@
     <div class="la-hero" id="intro">
       <a class="language-link" href="./index.html" lang="en">English ver.</a>
-      <h1>Basic Definition of probability</h1>
+      <h1>Interactive Probability</h1>
       <p class="la-meta"><time datetime="2026-07-23">2026.07.23</time></p>
-      <p class="la-footnote">참고: <a href="https://www.deeplearningbook.org/contents/prob.html" target="_blank" rel="noopener noreferrer">Goodfellow, Bengio &amp; Courville, <em>Deep Learning</em> — Chapter 3: Probability and Information Theory</a>. 정보이론(엔트로피·KL·크로스엔트로피)은 별도의 글로 다룹니다.</p>
       <!-- intro:start -->
       <p class="la-sub">
         앞선 <a href="../2026-07-14-linear-algebra/ko.html">선형대수</a> 글에서 데이터는 벡터와 행렬로 표현되고, 모델은 그 표현을 변환하는 선형사상이었습니다. 그런데 같은 입력을 같은 모델에 두 번 넣었을 때 <em>다른</em> 답이 나오는 상황은 이 언어만으로는 설명되지 않습니다. 언어 모델은 같은 프롬프트에서 매번 다른 문장을 생성하고, 확산 모델은 같은 조건에서 매번 다른 이미지를 만듭니다. 결정론적 함수가 아니라 <strong>분포</strong>를 다루고 있기 때문입니다.
@@ -22,7 +21,7 @@
     <div class="la-layout">
       <nav class="la-index" aria-label="이 글의 주제">
         <p class="la-index-title">Index</p>
-        <a href="#intro">Basic Definition of probability</a>
+        <a href="#intro">Interactive Probability</a>
         <a href="#randomvar">확률변수</a>
         <a href="#probabilitydistribution">확률분포</a>
         <a href="#distribution">PMF · PDF</a>
@@ -186,7 +185,7 @@
         <div class="topic-text">
           <p class="definition"><strong>정의 (합의 법칙).</strong> 결합분포에서 한 변수를 모든 값에 대해 합치면 나머지 변수의 분포가 남는다. 이렇게 얻은 \(P(x)\)를 <em>주변분포</em>라 부르고, 그 연산을 주변화라 한다. 연속에서는 합이 적분으로 바뀔 뿐 논리는 같다.</p>
           <p class="interp"><strong>왜 "주변"인가.</strong> 이름은 종이에 격자를 그리고 각 행과 열의 합을 <em>가장자리(margin)</em>에 적던 관습에서 왔다. 오른쪽 그림에서 \(Y\)를 합치면 각 열의 합이 아래쪽 여백에 \(P(X)\)로 남고, \(X\)를 합치면 각 행의 합이 옆 여백에 \(P(Y)\)로 남는다.</p>
-          <p class="interp"><strong>정보를 버리는 연산이다.</strong> 주변화는 되돌릴 수 없다. \(P(x)\)와 \(P(y)\)를 알아도 \(P(x,y)\)는 복원되지 않는다 — 같은 주변분포를 갖는 결합분포가 무수히 많기 때문이다(다음 절의 "독립" 데모에서 \(t\)를 움직여도 주변분포는 변하지 않는 것이 그 예다). 합쳐 없앤 변수에 대한 정보는 사라진다.</p>
+          <p class="interp"><strong>정보를 버리는 연산이다.</strong> 주변화는 되돌릴 수 없다. \(P(x)\)와 \(P(y)\)를 알아도 \(P(x,y)\)는 복원되지 않는다 — 같은 주변분포를 갖는 결합분포가 무수히 많기 때문이다(세 절 뒤 "독립" 데모에서 \(t\)를 움직여도 주변분포는 변하지 않는 것이 그 예다). 합쳐 없앤 변수에 대한 정보는 사라진다.</p>
           <p class="interp"><strong>머신러닝에서: 여기가 병목이다.</strong> 잠재변수 모델은 \(p(x)=\int p(x,z)\,dz\)로 정의되는데, 복잡한 모델에서는 이 적분을 정확히 계산하기 어려운 경우가 많다. VAE가 ELBO라는 하한을 대신 최적화하고, 베이즈 추론이 증거 \(p(x)=\int p(x\mid\theta)p(\theta)\,d\theta\) 때문에 MCMC나 변분추론에 의존하는 이유가 이 주변화에 있다. 확산 모델 역시 여러 중간 잠재상태를 도입해 직접 다루기 어려운 데이터 가능도를 단계별 확률과 계산 가능한 학습목표로 바꾼다.</p>
           <p class="formula">\[\begin{aligned} P(x) &amp;= \sum_y P(x,y) \\ p(x) &amp;= \int p(x,y)\,dy \\ p(x) &amp;= \int p(x,z)\,dz \quad\text{(잠재변수 제거)} \end{aligned}\]</p>
           <p class="hint">버튼으로 합칠 축을 바꿔보세요. 리드아웃의 막대가 해당 방향의 합을 보여주고, 합계는 언제나 1입니다. 격자 셀을 드래그해 결합분포를 바꿔도 주변분포가 어떻게 따라 움직이는지 확인해보세요.</p>
@@ -259,7 +258,7 @@
       <div class="topic-body">
         <div class="topic-text">
           <p class="definition"><strong>정의.</strong> \(X\)와 \(Y\)가 독립이라는 것은 모든 \(x,y\)에 대해 \(P(x,y)=P(x)P(y)\)가 성립한다는 뜻이며, \(X\perp Y\)로 쓴다. 조건부로 다시 쓰면 \(P(y\mid x)=P(y)\) — <em>\(x\)를 알아도 \(y\)에 대한 믿음이 전혀 달라지지 않는다.</em></p>
-          <p class="interp"><strong>기하적으로: 격자가 외적이 된다.</strong> 독립인 결합분포는 열 벡터와 행 벡터의 외적(outer product)이다. 그래서 모든 행이 서로 상수배이고, 모든 열도 서로 상수배다. 오른쪽에서 \(t\)를 1로 보내면 격자가 정확히 그런 모양으로 정리되는 것을 볼 수 있다. 이때 주변분포는 <strong>전혀 변하지 않는다</strong> — 같은 주변분포를 갖는 결합분포가 여럿이라는 앞 절의 이야기를 눈으로 확인하는 셈이다.</p>
+          <p class="interp"><strong>기하적으로: 격자가 외적이 된다.</strong> 독립인 결합분포는 열 벡터와 행 벡터의 외적(outer product)이다. 그래서 모든 행이 서로 상수배이고, 모든 열도 서로 상수배다. 오른쪽에서 \(t\)를 1로 보내면 격자가 정확히 그런 모양으로 정리되는 것을 볼 수 있다. 이때 주변분포는 <strong>전혀 변하지 않는다</strong> — 같은 주변분포를 갖는 결합분포가 여럿이라는 주변화 절의 이야기를 눈으로 확인하는 셈이다.</p>
           <p class="interp"><strong>대수적으로: 압축이다.</strong> 일반적인 \(K\times K\) 결합분포는 \(K^2-1\)개의 자유 파라미터를 갖지만, 독립을 가정하면 \(2(K-1)\)개로 줄어든다. \(K=5\)에서 24개가 8개가 되고, 변수가 \(n\)개면 \(K^n\)이 \(nK\)로 바뀐다. 지수가 선형이 되는 것이다. 대신 변수들 사이의 <em>모든</em> 상호작용을 표현할 수 없게 된다 — 압축에는 언제나 대가가 있다.</p>
           <p class="interp"><strong>머신러닝에서.</strong> <strong>나이브 베이즈</strong>는 클래스가 주어지면 모든 특징이 조건부 독립이라고 가정해 \(p(x\mid y)=\prod_j p(x_j\mid y)\)로 쓴다. 명백히 틀린 가정이지만 파라미터가 극적으로 줄어 적은 데이터로도 학습되고, 분류 성능은 종종 놀랄 만큼 쓸 만하다. 데이터셋을 i.i.d.로 가정하는 것, VAE에서 잠재변수의 각 차원을 독립으로 두는 것(\(p(z)=\prod_j \mathcal{N}(z_j;0,1)\)), 확산 모델이 각 픽셀에 독립 노이즈를 더하는 것도 모두 같은 종류의 가정이다.</p>
           <p class="formula">\[\begin{aligned} X \perp Y \iff P(x,y) &amp;= P(x)\,P(y) \quad \forall x,y \\ \iff P(y\mid x) &amp;= P(y) \\ \text{파라미터 수}:\quad K^2-1 &amp;\;\longrightarrow\; 2(K-1) \end{aligned}\]</p>
@@ -588,6 +587,8 @@ print(flips.mean())                                     # 0.7</code></pre>
       </div>
     </section>
 
+
+      <p class="la-footnote">참고: <a href="https://www.deeplearningbook.org/contents/prob.html" target="_blank" rel="noopener noreferrer">Goodfellow, Bengio &amp; Courville, <em>Deep Learning</em> — Chapter 3: Probability and Information Theory</a>. 정보이론(엔트로피·KL·크로스엔트로피)은 별도의 글로 다룹니다.</p>
         <a class="back-link" href="../../index.html">&larr; Back to all posts</a>
       </div>
     </div>

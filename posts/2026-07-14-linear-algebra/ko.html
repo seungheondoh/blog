@@ -72,19 +72,15 @@
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
 
-  <header class="site-header">
-    <a class="brand" href="../../index.html">Blog <span>· Seungheon Doh</span></a>
-    <nav>
-      <a href="https://seungheondoh.github.io/" target="_blank" rel="noopener noreferrer">About</a>
-    </nav>
-  </header>
-
   <main id="main-content" class="la-page">
     <div class="la-hero" id="intro">
       <a class="language-link" href="./index.html" lang="en">English ver.</a>
       <h1>Interactive Linear Algebra</h1>
       <p class="la-meta">Date: <time datetime="2026-07-14">July 14, 2026</time><span class="la-meta-sep">|</span>Estimated Reading Time: 34 min<span class="la-meta-sep">|</span>Author: Seungheon Doh</p>
-      <p class="la-footnote">참고: <a href="https://angeloyeo.github.io/" target="_blank" rel="noopener noreferrer">angeloyeo.github.io</a>의 선형대수 시리즈, 그리고 더 formal한 정의가 필요하면 <a href="https://www.deeplearningbook.org/contents/linear_algebra.html" target="_blank" rel="noopener noreferrer">Goodfellow, Bengio &amp; Courville, <em>Deep Learning</em> — Chapter 2: Linear Algebra</a>를 함께 참고했습니다.</p>
+      <details class="update-log">
+        <summary>Update log</summary>
+        <ul><li><time datetime="2026-07-14">July 14, 2026</time><span>최초 게시.</span></li></ul>
+      </details>
       <p class="la-sub">
         머신러닝 연구에서 데이터는 대개 벡터와 행렬의 형태로 표현됩니다. 언어 모델은 단어와 문장을 고차원 벡터로 변환하고, 이미지 모델은 픽셀과 시각적 특징을 텐서로 구성합니다. 이처럼 데이터에 수치적 좌표를 부여하는 <strong>표현학습</strong>은 모델이 의미와 패턴을 다룰 수 있게 만드는 출발점입니다.
       </p>
@@ -729,6 +725,8 @@ print(torch.einsum('i,i->', a, b))       # 내적 = 32.0</code></pre>
       </details>
     </section>
 
+
+      <p class="la-footnote">참고: <a href="https://angeloyeo.github.io/" target="_blank" rel="noopener noreferrer">angeloyeo.github.io</a>의 선형대수 시리즈, 그리고 더 formal한 정의가 필요하면 <a href="https://www.deeplearningbook.org/contents/linear_algebra.html" target="_blank" rel="noopener noreferrer">Goodfellow, Bengio &amp; Courville, <em>Deep Learning</em> — Chapter 2: Linear Algebra</a>를 함께 참고했습니다.</p>
         <a class="back-link" href="../../index.html">&larr; Back to all posts</a>
       </div>
     </div>
@@ -736,7 +734,6 @@ print(torch.einsum('i,i->', a, b))       # 내적 = 32.0</code></pre>
 
   <footer class="site-footer">
     <p>© <span id="current-year">2026</span> Seungheon Doh</p>
-    <a href="https://seungheondoh.github.io/" target="_blank" rel="noopener noreferrer">seungheondoh.github.io</a>
   </footer>
 
   <script src="../../js/common.js"></script>

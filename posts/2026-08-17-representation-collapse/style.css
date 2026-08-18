@@ -1,0 +1,252 @@
+/*
+ * Self-supervised learning / collapse post. Shared chrome lives in
+ * css/post.css and css/components.css; this file carries only what this post
+ * needs and the others do not — comparison tables, reference lists, and the
+ * text-only sections that have no demo column.
+ */
+
+/* Sections that argue rather than demonstrate run full width. */
+.topic-body.single { grid-template-columns: minmax(0, 1fr); }
+
+/* The fixed-vs-learned-target derivation is wider than a phone screen and KaTeX
+   will not break it. Without both rules the whole page scrolls sideways: the
+   grid item's automatic min-width floor is its min-content width, which that
+   equation sets. Drop the floor, then let the equation scroll inside its own
+   box the way the tables already do. */
+.topic-text { min-width: 0; }
+.formula { overflow-x: auto; }
+
+/* Korean prose uses color, not italics, for emphasis. */
+.la-page em { font-style: normal; }
+.interp em { color: var(--ink); }
+
+/* --- comparison tables ---------------------------------------------------
+   The post is built out of two-axis comparisons, so tables are load-bearing
+   here rather than decorative. They stay legible at narrow widths by scrolling
+   inside their own box instead of widening the page. */
+
+.cmp {
+  display: block;
+  overflow-x: auto;
+  width: 100%;
+  margin: 0 0 1rem;
+  border-collapse: collapse;
+  font-size: .82rem;
+  line-height: 1.45;
+}
+
+.cmp thead th {
+  padding: .45rem .6rem;
+  border-bottom: 1.5px solid var(--ink);
+  color: var(--ink);
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.cmp td {
+  padding: .45rem .6rem;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+/* Where the first cell of a row is the row's name, weight it here rather than
+   with a <strong> in each of seventy cells. Tables whose first column is a
+   sentence rather than a label leave the class off. */
+.cmp.labeled tbody td:first-child { font-weight: 600; }
+.cmp.labeled tbody td:first-child .sub { font-weight: 400; }
+
+.cmp tbody tr:last-child td { border-bottom: 1px solid var(--line); }
+
+/* Rows that act at the within-sample level — the post's whole argument turns
+   on telling them apart from the global ones at a glance. */
+.cmp tr.hi td { background: #fff8f0; }
+
+.cmp .sub { color: var(--muted); font-size: .95em; }
+
+/* The one sentence the closing section exists to deliver. Set apart from the
+   surrounding argument rather than dressed up. */
+.thesis {
+  margin: 1.1rem 0;
+  padding: .85rem 1.1rem;
+  background: #fbf7f2;
+  border-left: 3px solid #ef7d32;
+  border-radius: 0 5px 5px 0;
+  font-size: .95rem;
+  line-height: 1.7;
+}
+
+/* --- reference lists --- */
+
+.refs {
+  margin: 0 0 1.2rem;
+  padding-left: 1.1rem;
+  font-size: .82rem;
+  line-height: 1.55;
+}
+
+.refs li { margin-bottom: .45rem; }
+.topic h3 { margin-top: 1.4rem; }
+
+/* --- demo tweaks --- */
+
+/* Several demos stack a synthetic panel above the panel drawn from the logged
+   runs; the pair should read as one figure. */
+.topic-demo canvas + canvas { margin-top: .4rem; }
+
+/* The fixed and learned targets are a direct comparison: keep both panels on
+   one horizontal line. Narrow screens scroll this figure instead of stacking
+   the alternatives and breaking that visual comparison. */
+.target-demo { position: static; }
+.target-figure-scroll { overflow-x: auto; }
+#c-target {
+  min-width: 680px;
+  height: 340px;
+}
+
+.target-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem 1rem;
+  margin: .65rem 0 .75rem;
+  color: var(--muted);
+  font-size: .74rem;
+}
+
+.target-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+}
+
+.target-mark {
+  display: inline-block;
+  box-sizing: border-box;
+  width: .62rem;
+  height: .62rem;
+  border-radius: 50%;
+}
+
+.output-mark { background: #ef7d32; }
+.target-mark-ring { border: 1.5px solid #1769aa; background: #fff; }
+
+.target-examples {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .65rem;
+  margin-bottom: .55rem;
+}
+
+.target-examples div {
+  padding: .7rem .8rem;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fbfbfa;
+  font-size: .78rem;
+  line-height: 1.5;
+}
+
+.target-examples strong,
+.target-examples span { display: block; }
+.target-examples strong { margin-bottom: .2rem; color: var(--ink); }
+.target-examples span { color: var(--muted); }
+
+@media (max-width: 620px) {
+  .target-examples { grid-template-columns: 1fr; }
+}
+#c-sigreg-cloud { height: 260px; }
+#c-sigreg-marg { height: 200px; }
+
+/* Run pickers list eleven configs, so they need to wrap rather than scroll. */
+.preset-row { flex-wrap: wrap; }
+.preset-row button { font-size: .74rem; }
+
+.sim-controls { justify-content: center; }
+
+/* The taxonomy diagram is a 2×3 grid of panels, so it needs the full text
+   column rather than the demo column. Capped at its intrinsic width so the
+   labels never scale past their design size. */
+.taxonomy-static {
+  max-width: 960px;
+  margin: 1.1rem auto 0;
+}
+
+.taxonomy-static img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.figure-caption {
+  margin: .55rem 0 0;
+  color: var(--muted);
+  font-size: .76rem;
+  line-height: 1.5;
+}
+
+/* --- algorithm listings ---------------------------------------------------
+   The five design-pattern sections carry their reference implementation the
+   way the source papers do — a numbered float set beside the prose rather than
+   run into it. Sections 1/2/4 have no canvas, so the listing is the whole demo
+   column; 3 and 5 hang it under the live demo. Rules top and bottom, no side
+   frame: the LaTeX float look, not a web code block. */
+
+.listing {
+  margin: 0;
+  border-top: 1.5px solid var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+  background: #fff;
+}
+
+/* Demo columns are sticky, which only holds while the column is shorter than
+   the viewport — a stuck box taller than the screen hides its own bottom. A
+   listing is tall enough to cross that line, so opt the column out wherever
+   one is present. */
+.topic-demo:has(.listing) { position: static; }
+
+/* Under the live demo in the two sections that have one. */
+.topic-demo > * + .listing { margin-top: 1.2rem; }
+
+.listing figcaption {
+  padding: .5rem .1rem .45rem;
+  border-bottom: 1px solid var(--line);
+  font-size: .78rem;
+  line-height: 1.45;
+}
+
+.listing figcaption b { font-weight: 600; }
+
+.listing pre {
+  margin: 0;
+  padding: .7rem .1rem .75rem;
+  overflow-x: auto;
+}
+
+.listing code {
+  font: 11.5px/1.62 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  white-space: pre;
+}
+
+/* What listings itself does with its two default styles. */
+.listing .c { color: #8a8f98; }
+.listing .k { font-weight: 600; }
+
+/* The three token-level devices are a comparison, so they run side by side
+   across the full text column rather than stacking down the demo rail. */
+.listing-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin: 1.2rem 0 0;
+}
+
+.listing-row .listing code { font-size: 11px; }
+
+.listing-row + .figure-caption { margin-bottom: 1.2rem; }
+
+@media (max-width: 760px) {
+  .listing-row { grid-template-columns: 1fr; gap: 1.1rem; }
+}

@@ -3,6 +3,20 @@ function formatDate(iso) {
   return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' });
 }
 
+function updateLog(updates, published) {
+  const entries = updates?.length ? updates : published
+    ? [{ date: published, note: 'Published.' }]
+    : [];
+  if (!entries.length) return '';
+  return `
+      <details class="update-log">
+        <summary>Update log</summary>
+        <ul>${entries.map((update) => `
+          <li><time datetime="${update.date}">${formatDate(update.date)}</time><span>${update.note || ''}</span></li>
+        `).join('')}</ul>
+      </details>`;
+}
+
 // Rewrite relative img/a paths so they resolve against the post's own
 // folder (posts/<slug>/...) instead of blog/ where post.html lives.
 function resolveRelativeUrls(container, baseDir) {
@@ -46,6 +60,7 @@ async function loadPost() {
       <p class="post-meta">
         ${meta.date ? `<time datetime="${meta.date}">${formatDate(meta.date)}</time>` : ''}
       </p>
+      ${updateLog(meta.updates, meta.date)}
       <div class="post-content">${renderMarkdown(md)}</div>
     `;
 

@@ -3,7 +3,19 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://seungheondoh.github.io/blog/</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
+  </url>
+  <url>
+    <loc>https://seungheondoh.github.io/blog/posts/2026-08-17-representation-collapse/</loc>
+    <lastmod>2026-08-17</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://seungheondoh.github.io/blog/posts/2026-08-17-representation-collapse/"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://seungheondoh.github.io/blog/posts/2026-08-17-representation-collapse/ko.html"/>
+  </url>
+  <url>
+    <loc>https://seungheondoh.github.io/blog/posts/2026-08-17-representation-collapse/ko.html</loc>
+    <lastmod>2026-08-17</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://seungheondoh.github.io/blog/posts/2026-08-17-representation-collapse/"/>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://seungheondoh.github.io/blog/posts/2026-08-17-representation-collapse/ko.html"/>
   </url>
   <url>
     <loc>https://seungheondoh.github.io/blog/posts/2026-08-16-sde-and-diffusion/</loc>

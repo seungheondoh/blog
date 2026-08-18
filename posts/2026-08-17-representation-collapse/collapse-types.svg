@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 644" role="img" aria-labelledby="title desc">
+  <title id="title">Types of collapse and related failures</title>
+  <desc id="desc">Six panels in two rows of three compare complete, dimensional, covariance redundancy, mode and token collapse, plus loss of local structure. Each panel names the observation unit, the diagnostic statistic and the models it applies to. The two warm-tinted panels are the within-image failures.</desc>
+  <defs>
+    <style>
+      .panel{fill:#fbfbfa;stroke:#deddd8}
+      .panel.hi{fill:#fff8f0;stroke:#e8d5c0}
+      .title{font:600 17px system-ui,sans-serif;fill:#20201e}
+      .sub{font:12.5px system-ui,sans-serif;fill:#3f3e3a}
+      .meta{font:11px system-ui,sans-serif;fill:#8b8880}
+      .axis{stroke:#d8d6d0;stroke-width:1}
+      .dot{fill:#1769aa;opacity:.72}
+      .orange{fill:#ef7d32}.green{fill:#29966f}.purple{fill:#8465b3}.red{fill:#d94b45}.cyan{fill:#3199a8}
+      .cell{stroke:#fff;stroke-width:3}
+      .ghost{fill:none;stroke:#bbb8b0;stroke-width:2;stroke-dasharray:5 5}
+      .diag{stroke:#bbb8b0;stroke-width:2}
+      .arrow{stroke:#9b9890;stroke-width:2;marker-end:url(#head)}
+    </style>
+    <marker id="head" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#9b9890"/></marker>
+  </defs>
+  <rect width="960" height="644" fill="#fff"/>
+
+  <!-- row 1, col 1: complete -->
+  <g transform="translate(14 14)">
+    <rect class="panel" width="300" height="300" rx="12"/>
+    <text class="title" x="18" y="32">Complete Collapse</text>
+    <text class="sub" x="18" y="56">모든 이미지가 같은 벡터가 된다</text>
+    <line class="axis" x1="52" y1="205" x2="268" y2="205"/>
+    <line class="axis" x1="52" y1="76" x2="52" y2="205"/>
+    <g transform="translate(160 140)">
+      <circle class="dot" cx="-8" cy="3" r="8"/><circle class="orange" cx="6" cy="-5" r="8"/>
+      <circle class="green" cx="2" cy="8" r="8"/><circle class="purple" cx="-4" cy="-8" r="8"/>
+    </g>
+    <circle class="ghost" cx="160" cy="140" r="44"/>
+    <path class="arrow" d="M114 98L144 124"/><path class="arrow" d="M206 98L176 124"/>
+    <path class="arrow" d="M114 182L144 156"/><path class="arrow" d="M206 182L176 156"/>
+    <text class="meta" x="18" y="242">관측 단위: sample</text>
+    <text class="meta" x="18" y="262">진단: 차원별 표준편차</text>
+    <text class="meta" x="18" y="282">joint-embedding 전반</text>
+  </g>
+
+  <!-- row 1, col 2: dimensional -->
+  <g transform="translate(330 14)">
+    <rect class="panel" width="300" height="300" rx="12"/>
+    <text class="title" x="18" y="32">Dimensional Collapse</text>
+    <text class="sub" x="18" y="56">512차원인데 실제로는 몇 축만 쓴다</text>
+    <line class="axis" x1="52" y1="205" x2="268" y2="205"/>
+    <line class="axis" x1="52" y1="76" x2="52" y2="205"/>
+    <ellipse class="ghost" cx="160" cy="140" rx="88" ry="48"/>
+    <line class="diag" x1="84" y1="180" x2="236" y2="100"/>
+    <g transform="translate(160 140) rotate(-27.7)">
+      <circle class="dot" cx="-80" cy="0" r="7"/><circle class="orange" cx="-48" cy="1" r="7"/>
+      <circle class="green" cx="-16" cy="-2" r="7"/><circle class="purple" cx="16" cy="2" r="7"/>
+      <circle class="red" cx="48" cy="-1" r="7"/><circle class="cyan" cx="79" cy="1" r="7"/>
+    </g>
+    <text class="meta" x="18" y="242">관측 단위: embedding 차원</text>
+    <text class="meta" x="18" y="262">진단: 고유값 분포 · effective rank</text>
+    <text class="meta" x="18" y="282">joint-embedding 전반</text>
+  </g>
+
+  <!-- row 1, col 3: covariance redundancy -->
+  <g transform="translate(646 14)">
+    <rect class="panel" width="300" height="300" rx="12"/>
+    <text class="title" x="18" y="32">Covariance redundancy</text>
+    <text class="sub" x="18" y="56">축들이 서로 같은 말을 반복한다</text>
+    <line class="axis" x1="52" y1="205" x2="268" y2="205"/>
+    <line class="axis" x1="52" y1="76" x2="52" y2="205"/>
+    <line class="diag" x1="66" y1="192" x2="204" y2="88"/>
+    <g transform="translate(135 140) rotate(-37)">
+      <circle class="dot" cx="-76" cy="3" r="7"/><circle class="orange" cx="-45" cy="-4" r="7"/>
+      <circle class="green" cx="-14" cy="5" r="7"/><circle class="red" cx="44" cy="4" r="7"/>
+      <circle class="cyan" cx="74" cy="-3" r="7"/>
+    </g>
+    <path class="ghost" d="M52 140H162M162 140V205"/>
+    <circle class="purple" cx="162" cy="140" r="8"/>
+    <text class="sub" x="182" y="178">z₂ ≈ z₁</text>
+    <text class="meta" x="252" y="200">z₁</text>
+    <text class="meta" x="58" y="74">z₂</text>
+    <text class="meta" x="18" y="242">관측 단위: 차원 쌍</text>
+    <text class="meta" x="18" y="262">진단: 상관행렬 비대각 RMS</text>
+    <text class="meta" x="18" y="282">VICReg의 "informational collapse"</text>
+  </g>
+
+  <!-- row 2, col 1: mode -->
+  <g transform="translate(14 330)">
+    <rect class="panel" width="300" height="300" rx="12"/>
+    <text class="title" x="18" y="32">Mode Collapse</text>
+    <text class="sub" x="18" y="56">준비된 선택지 여섯 중 둘만 쓴다</text>
+    <circle class="ghost" cx="90" cy="112" r="20"/><circle class="ghost" cx="160" cy="112" r="20"/><circle class="ghost" cx="230" cy="112" r="20"/>
+    <circle class="ghost" cx="90" cy="176" r="20"/><circle class="ghost" cx="160" cy="176" r="20"/><circle class="ghost" cx="230" cy="176" r="20"/>
+    <circle class="orange" cx="90" cy="112" r="13"/><circle class="orange" cx="84" cy="120" r="6"/><circle class="orange" cx="97" cy="104" r="6"/>
+    <circle class="purple" cx="160" cy="176" r="13"/><circle class="purple" cx="153" cy="170" r="6"/><circle class="purple" cx="167" cy="183" r="6"/>
+    <text class="meta" x="18" y="242">관측 단위: prototype · code</text>
+    <text class="meta" x="18" y="262">진단: 사용 빈도 perplexity</text>
+    <text class="meta" x="18" y="282">prototype head나 코드북이 있는 방법만</text>
+  </g>
+
+  <!-- row 2, col 2: token (within-image) -->
+  <g transform="translate(330 330)">
+    <rect class="panel hi" width="300" height="300" rx="12"/>
+    <text class="title" x="18" y="32">Token Collapse</text>
+    <text class="sub" x="18" y="56">한 이미지 안 조각들이 서로 비슷해진다</text>
+    <g transform="translate(97 78)">
+      <rect class="cell orange" x="0" y="0" width="30" height="30"/><rect class="cell orange" x="32" y="0" width="30" height="30"/><rect class="cell orange" x="64" y="0" width="30" height="30"/><rect class="cell orange" x="96" y="0" width="30" height="30"/>
+      <rect class="cell orange" x="0" y="32" width="30" height="30"/><rect class="cell orange" x="32" y="32" width="30" height="30"/><rect class="cell orange" x="64" y="32" width="30" height="30"/><rect class="cell orange" x="96" y="32" width="30" height="30"/>
+      <rect class="cell orange" x="0" y="64" width="30" height="30"/><rect class="cell orange" x="32" y="64" width="30" height="30"/><rect class="cell orange" x="64" y="64" width="30" height="30"/><rect class="cell orange" x="96" y="64" width="30" height="30"/>
+      <rect class="cell orange" x="0" y="96" width="30" height="30"/><rect class="cell orange" x="32" y="96" width="30" height="30"/><rect class="cell orange" x="64" y="96" width="30" height="30"/><rect class="cell orange" x="96" y="96" width="30" height="30"/>
+    </g>
+    <text class="meta" x="18" y="242">관측 단위: 한 sample 안의 token</text>
+    <text class="meta" x="18" y="262">진단: token Gram rank</text>
+    <text class="meta" x="18" y="282">token을 내놓는 encoder 전반</text>
+  </g>
+
+  <!-- row 2, col 3: local structure lost (within-image) -->
+  <g transform="translate(646 330)">
+    <rect class="panel hi" width="300" height="300" rx="12"/>
+    <text class="title" x="18" y="32">Local structure lost</text>
+    <text class="sub" x="18" y="56">조각은 다른데 위치와의 연결이 흐려진다</text>
+    <g transform="translate(97 78)">
+      <rect class="cell orange" x="0" y="0" width="30" height="30"/><rect class="cell purple" x="32" y="0" width="30" height="30"/><rect class="cell green" x="64" y="0" width="30" height="30"/><rect class="cell red" x="96" y="0" width="30" height="30"/>
+      <rect class="cell cyan" x="0" y="32" width="30" height="30"/><rect class="cell red" x="32" y="32" width="30" height="30"/><rect class="cell orange" x="64" y="32" width="30" height="30"/><rect class="cell purple" x="96" y="32" width="30" height="30"/>
+      <rect class="cell green" x="0" y="64" width="30" height="30"/><rect class="cell orange" x="32" y="64" width="30" height="30"/><rect class="cell cyan" x="64" y="64" width="30" height="30"/><rect class="cell red" x="96" y="64" width="30" height="30"/>
+      <rect class="cell purple" x="0" y="96" width="30" height="30"/><rect class="cell cyan" x="32" y="96" width="30" height="30"/><rect class="cell red" x="64" y="96" width="30" height="30"/><rect class="cell green" x="96" y="96" width="30" height="30"/>
+    </g>
+    <text class="meta" x="18" y="242">관측 단위: 한 sample 안의 token + 위치</text>
+    <text class="meta" x="18" y="262">진단: contrast gap · 위치 맞히기</text>
+    <text class="meta" x="18" y="282">엄밀히는 collapse가 아니다</text>
+  </g>
+</svg>

@@ -2,7 +2,6 @@
       <a class="language-link" href="./index.html" lang="en">English ver.</a>
       <h1>Basic Definition of stochastic differential equations</h1>
       <p class="la-meta"><time datetime="2026-08-16">2026.08.16</time></p>
-      <p class="la-footnote">참고: Fu &amp; Wang, <em>A Tutorial on Diffusion Theory: From Differential Equations to Diffusion Models</em> (INSAIT), 그리고 Anderson (1982), Song et al., <em>Score-Based Generative Modeling through SDEs</em>. 앞 글 <a href="../2026-08-16-ode-and-pde/ko.html">Interactive Differential Equations</a>에서 이어지며, <a href="../2026-07-23-interactive-probability/ko.html">Interactive Probability</a>의 분포·기대값 개념을 함께 씁니다.</p>
       <!-- intro:start -->
       <p class="la-sub">
         <a href="../2026-08-16-ode-and-pde/ko.html">앞 글</a>은 결정론적인 세계였습니다. 벡터장을 따라가는 곡선 하나(ODE)에서 출발해, 그 곡선들의 밀도가 어떻게 흘러가는지(연속방정식)까지 갔습니다. 같은 초기값에서 출발하면 언제나 같은 궤적이 나왔습니다.
@@ -103,7 +102,7 @@
           <p class="definition"><strong>정의.</strong> 위너 과정 \(W_t\)는 다음 네 조건으로 정의된다. ① \(W_0=0\). ② 겹치지 않는 구간의 증분은 서로 독립. ③ \(W_t-W_s\sim\mathcal{N}(0,\,t-s)\). ④ 경로가 연속. 특히 <strong>증분의 분산이 시간 간격 그 자체</strong>라는 점을 기억해두자.</p>
           <p class="interp"><strong>연속인데 어디서도 미분 불가능하다.</strong> 증분의 크기가 \(\sqrt{\Delta t}\) 규모이므로 차분몫은 \(\Delta W/\Delta t\sim 1/\sqrt{\Delta t}\)로, \(\Delta t\to 0\)에서 발산한다. 그래서 \(\dot{W}\)는 존재하지 않는다. <strong>이것이 확률미분방정식을 \(\frac{dX}{dt}=\ldots\) 꼴로 쓸 수 없고 \(dX=\ldots\,dW\)라는 미분형으로 쓰는 이유다.</strong> 오른쪽에서 확대해보면 아무리 들여다봐도 매끄러워지지 않고 같은 거칠기가 반복된다 — 자기 유사성이다.</p>
           <p class="interp"><strong>스케일링 성질.</strong> \(W_{ct}\)와 \(\sqrt{c}\,W_t\)는 같은 분포를 갖는다. 시간을 \(c\)배 늘리면 공간은 \(\sqrt{c}\)배로 퍼진다는 뜻이며, 랜덤워크의 \(\sqrt{n}\) 법칙이 연속판으로 옮겨온 것이다.</p>
-          <p class="interp"><strong>확산방정식과 같은 것이다.</strong> \(W_t\)의 확률밀도는 정확히 \(p(t,x)=\frac{1}{\sqrt{2\pi t}}e^{-x^2/2t}\)이고, 이것은 \(\alpha=1/2\)인 <a href="#heat">확산방정식</a>의 기본해다. <strong>즉 브라운 운동은 확산방정식의 "입자 버전"이다</strong> — 세 절 전 "입자에서 밀도로"의 가장 중요한 사례이며, 뒤에서 Fokker–Planck로 일반화된다.</p>
+          <p class="interp"><strong>확산방정식과 같은 것이다.</strong> \(W_t\)의 확률밀도는 정확히 \(p(t,x)=\frac{1}{\sqrt{2\pi t}}e^{-x^2/2t}\)이고, 이것은 \(\alpha=1/2\)인 <a href="../2026-08-16-ode-and-pde/ko.html#heat">확산방정식</a>의 기본해다. <strong>즉 브라운 운동은 확산방정식의 "입자 버전"이다</strong> — 앞 글 "입자에서 밀도로"의 가장 중요한 사례이며, 뒤에서 Fokker–Planck로 일반화된다.</p>
           <p class="interp"><strong>머신러닝에서.</strong> 확산 모델의 순방향 과정이 브라운 운동(에 드리프트를 더한 것)이다. 노이즈 스케줄 \(\sqrt{1-\bar\alpha_t}\)가 하는 일이 이 과정의 시간 척도를 정하는 것이며, "노이즈를 얼마나 더할까"는 곧 "얼마나 오래 확산시킬까"와 같은 질문이다.</p>
           <p class="formula">\[\begin{aligned} W_0 &amp;= 0, \quad W_t - W_s \sim \mathcal{N}(0, t-s) \\ \mathbb{E}[W_t] = 0, \quad &amp;\mathrm{Var}(W_t) = t, \quad \mathbb{E}[W_sW_t] = \min(s,t) \\ W_{ct} &amp;\overset{d}{=} \sqrt{c}\,W_t \end{aligned}\]</p>
           <p class="hint">확대 배율을 올려 경로의 일부를 들여다보세요. <strong>아무리 확대해도 매끄러워지지 않습니다</strong> — 미분 불가능성을 눈으로 보는 것입니다. 회색 곡선은 ±√t 범위이고, 경로들이 그 안에서 퍼져 나갑니다.</p>
@@ -181,7 +180,7 @@
           <p class="definition"><strong>정의.</strong> 짧은 시간 \(\Delta t\) 동안의 변화를 조건부 모멘트로 정의한다. <strong>드리프트</strong> \(f(x,t)=\lim_{\Delta t\to 0}\frac{1}{\Delta t}\mathbb{E}[\Delta X\mid X=x]\)는 평균 변화율이고, <strong>확산계수</strong> \(g^2(x,t)=\lim_{\Delta t\to 0}\frac{1}{\Delta t}\mathbb{E}[(\Delta X)^2\mid X=x]\)는 분산의 증가율이다.</p>
           <p class="interp"><strong>왜 하나는 \(\Delta t\), 다른 하나는 \(\sqrt{\Delta t}\)인가.</strong> 드리프트가 만드는 변위는 \(\Delta t\)에 비례하지만, 무작위 변위는 \(\sqrt{\Delta t}\)에 비례한다(랜덤워크의 \(\sqrt{n}\) 법칙). 그래서 <strong>\(\Delta t\)가 아주 작으면 무작위 항이 압도적으로 크다.</strong> 짧게 보면 지그재그가 지배하고 길게 보면 방향성이 드러나는 이유이며, 이 척도 차이가 다음 절 이토 미적분의 모든 기묘함의 근원이다.</p>
           <p class="interp"><strong>둘의 경쟁이 정상분포를 만든다.</strong> 드리프트가 원점으로 끌어당기고 확산이 퍼뜨리면 둘이 균형을 이루는 지점에서 분포가 멈춘다. Ornstein–Uhlenbeck 과정 \(dX=-\theta X\,dt+\sigma\,dW\)가 그 예로, 정상분포는 \(\mathcal{N}(0,\sigma^2/2\theta)\)다. <strong>확산 모델의 순방향 과정이 정확히 이 형태이며, 그래서 충분히 오래 돌리면 데이터가 무엇이었든 표준 가우시안에 도달한다.</strong></p>
-          <p class="interp"><strong>밀도의 언어로 보면.</strong> 드리프트는 밀도를 통째로 실어 나르고(수송 항), 확산은 뭉갠다(확산 항). 뒤에 나올 Fokker–Planck 방정식 \(\partial_t p=-\nabla\cdot(fp)+\frac{1}{2}\nabla^2(g^2p)\)의 두 항이 정확히 이 둘이다 — <a href="#continuity">연속방정식</a>과 <a href="#heat">확산방정식</a>이 한 식에 합쳐진 것이라 보면 된다.</p>
+          <p class="interp"><strong>밀도의 언어로 보면.</strong> 드리프트는 밀도를 통째로 실어 나르고(수송 항), 확산은 뭉갠다(확산 항). 뒤에 나올 Fokker–Planck 방정식 \(\partial_t p=-\nabla\cdot(fp)+\frac{1}{2}\nabla^2(g^2p)\)의 두 항이 정확히 이 둘이다 — <a href="../2026-08-16-ode-and-pde/ko.html#continuity">연속방정식</a>과 <a href="../2026-08-16-ode-and-pde/ko.html#heat">확산방정식</a>이 한 식에 합쳐진 것이라 보면 된다.</p>
           <p class="interp"><strong>머신러닝에서.</strong> VP-SDE(DDPM에 대응)는 \(f=-\frac{1}{2}\beta(t)x\), \(g=\sqrt{\beta(t)}\)로 드리프트가 원점으로 수축시키고 확산이 노이즈를 채운다. VE-SDE(SMLD)는 \(f=0\)으로 드리프트 없이 분산만 키운다. 노이즈 스케줄을 설계한다는 것은 이 두 계수를 설계하는 일이다.</p>
           <p class="formula">\[\begin{aligned} f(x,t) &amp;= \lim_{\Delta t\to 0}\tfrac{1}{\Delta t}\mathbb{E}[\Delta X\mid x] &amp;&amp;\text{(드리프트)} \\ g^2(x,t) &amp;= \lim_{\Delta t\to 0}\tfrac{1}{\Delta t}\mathbb{E}[(\Delta X)^2\mid x] &amp;&amp;\text{(확산)} \\ \Delta X &amp;\approx f\,\Delta t + g\sqrt{\Delta t}\,\xi, \quad \xi\sim\mathcal{N}(0,1) \end{aligned}\]</p>
           <p class="hint">드리프트와 확산 세기를 따로 움직여보세요. <strong>드리프트만 있으면 결정론적 곡선</strong>이 되고, <strong>확산만 있으면 방향 없이 퍼지며</strong>, 둘 다 있으면 퍼지면서 끌려갑니다. OU 프리셋에서는 두 힘이 균형을 이뤄 분포가 일정한 폭에서 멈추는 것을 볼 수 있습니다 — 확산 모델이 가우시안에 도달하는 원리입니다.</p>
@@ -311,7 +310,7 @@
       <p class="topic-lead">SDE를 실제로 컴퓨터에서 돌리는 방법이다. 오일러법에 노이즈 항 하나를 더한 것뿐이지만, 그 항의 크기가 Δt가 아니라 √Δt라는 점이 전부를 결정한다.</p>
       <div class="topic-body">
         <div class="topic-text">
-          <p class="definition"><strong>정의.</strong> \(X_{n+1}=X_n+f(X_n,t_n)\Delta t+g(X_n,t_n)\sqrt{\Delta t}\,\xi_n\), 여기서 \(\xi_n\sim\mathcal{N}(0,1)\)은 매 걸음 새로 뽑는다. 결정론 항은 <a href="#euler">오일러법</a> 그대로이고, 노이즈 항의 크기가 \(\sqrt{\Delta t}\)라는 점만 다르다.</p>
+          <p class="definition"><strong>정의.</strong> \(X_{n+1}=X_n+f(X_n,t_n)\Delta t+g(X_n,t_n)\sqrt{\Delta t}\,\xi_n\), 여기서 \(\xi_n\sim\mathcal{N}(0,1)\)은 매 걸음 새로 뽑는다. 결정론 항은 <a href="../2026-08-16-ode-and-pde/ko.html#euler">오일러법</a> 그대로이고, 노이즈 항의 크기가 \(\sqrt{\Delta t}\)라는 점만 다르다.</p>
           <p class="interp"><strong>왜 √Δt인가.</strong> 브라운 증분의 표준편차가 \(\sqrt{\Delta t}\)이기 때문이다(\(W_{t+\Delta t}-W_t\sim\mathcal{N}(0,\Delta t)\)). 여기서 \(\Delta t\)를 쓰면 노이즈가 턱없이 작아져 \(\Delta t\to 0\)에서 SDE가 아니라 ODE로 수렴해버린다. <strong>구현에서 가장 흔한 버그가 이 제곱근을 빠뜨리는 것이다.</strong></p>
           <p class="interp"><strong>두 종류의 수렴.</strong> <em>강수렴</em>은 같은 브라운 경로에 대해 경로 자체가 얼마나 가까운지를 재고, 오일러–마루야마는 차수 \(1/2\)다. <em>약수렴</em>은 분포(기대값)가 얼마나 가까운지를 재고 차수 \(1\)이다. <strong>생성 모델에서 중요한 것은 약수렴이다</strong> — 특정 경로를 재현할 필요는 없고 올바른 분포에서 샘플이 나오면 되기 때문이다. 오른쪽 그래프에서 두 오차가 서로 다른 기울기로 내려가는 것을 볼 수 있다.</p>
           <p class="interp"><strong>고차 방법은 왜 어려운가.</strong> 결정론적 ODE에서는 RK4로 쉽게 4차를 얻었지만, SDE에서는 \(dW\)의 반복 적분(Lévy 면적 등)을 다뤄야 해서 고차 방법이 훨씬 복잡하고 비싸다. Milstein 법이 강수렴 차수를 1로 올리지만 \(g\)의 도함수를 요구한다.</p>
@@ -341,7 +340,7 @@
         <div class="topic-text">
           <p class="definition"><strong>역방향 SDE (Anderson, 1982).</strong> 순방향 \(dX=f\,dt+g\,dW\)를 시간에 대해 뒤집으면 \[dX=\big[f(X,t)-g^2(t)\,\nabla_x\log p_t(X)\big]dt+g(t)\,d\bar{W},\] 여기서 \(\bar{W}\)는 역시간 브라운 운동이다. 순방향 계수에 <strong>\(-g^2\nabla_x\log p_t\)</strong>라는 항 하나가 더해질 뿐이다.</p>
           <p class="interp"><strong>스코어란 무엇인가.</strong> \(s(x,t)=\nabla_x\log p_t(x)\)를 스코어라 하며, "밀도가 높아지는 쪽을 가리키는 벡터장"이다. <a href="../2026-08-08-interactive-calculus/ko.html#gradient">그래디언트</a>이므로 등고선과 직교하고 봉우리를 향한다. 확산이 데이터를 흩어놓았다면, 역과정은 이 화살표를 따라 <strong>데이터가 있던 자리로 되돌아간다.</strong></p>
-          <p class="interp"><strong>왜 추가 정보가 필요한가.</strong> <a href="#heat">확산은 비가역</a>이라고 했다. 개별 경로만 보면 되돌릴 수 없는 것이 맞다. 그런데 <em>분포 전체</em>의 정보를 알면 "이 위치에 온 입자는 평균적으로 어디서 왔을 것"이라고 추론할 수 있다. 스코어가 바로 그 정보이며, 순방향 과정을 되돌리려면 <strong>매 시각의 주변분포를 알아야 한다</strong>는 것이 이 정리의 요점이다.</p>
+          <p class="interp"><strong>왜 추가 정보가 필요한가.</strong> <a href="../2026-08-16-ode-and-pde/ko.html#heat">확산은 비가역</a>이라고 했다. 개별 경로만 보면 되돌릴 수 없는 것이 맞다. 그런데 <em>분포 전체</em>의 정보를 알면 "이 위치에 온 입자는 평균적으로 어디서 왔을 것"이라고 추론할 수 있다. 스코어가 바로 그 정보이며, 순방향 과정을 되돌리려면 <strong>매 시각의 주변분포를 알아야 한다</strong>는 것이 이 정리의 요점이다.</p>
           <p class="interp"><strong>정규화 상수가 사라진다.</strong> 스코어의 결정적 이점은 \(\nabla_x\log p=\nabla_x\log\tilde{p}-\nabla_x\log Z=\nabla_x\log\tilde{p}\)라는 점이다. <strong>계산 불가능한 정규화 상수 \(Z\)가 미분에서 사라진다.</strong> 밀도를 직접 학습하려면 \(Z\)와 씨름해야 하지만 스코어는 그럴 필요가 없다 — 스코어 기반 모델링이 성립하는 근본 이유다.</p>
           <p class="interp"><strong>머신러닝에서: 이것이 확산 모델이다.</strong> 스코어를 신경망 \(s_\theta(x,t)\)로 근사하면 역방향 SDE를 풀어 노이즈에서 데이터를 생성할 수 있다. 그리고 순방향이 가우시안이라 <a href="#gaussiannoise">스코어가 선형 형태</a>를 가지므로, 스코어를 맞히는 문제는 <strong>"더해진 노이즈 \(\epsilon\)을 맞히는 회귀 문제"</strong>로 환원된다 — DDPM의 손실 \(\|\epsilon-\epsilon_\theta(x_t,t)\|^2\)가 그것이며, <a href="../2026-07-23-interactive-probability/ko.html#gaussian">MSE가 가우시안 NLL</a>이라는 사실과 정확히 맞물린다.</p>
           <p class="formula">\[\begin{aligned} \text{순방향: } dX &amp;= f\,dt + g\,dW \\ \text{역방향: } dX &amp;= \big[f - g^2\,\nabla_x\log p_t(X)\big]dt + g\,d\bar{W} \\ s_\theta(x,t) &amp;\approx \nabla_x\log p_t(x) = -\epsilon/\sigma_t \end{aligned}\]</p>
@@ -367,8 +366,8 @@
       <div class="topic-body">
         <div class="topic-text">
           <p class="definition"><strong>주변분포.</strong> SDE의 해 \(X_t\)에 대해 각 시각의 확률밀도 \(p_t(x)\)를 그 과정의 주변분포라 한다. 개별 경로는 무작위지만 <strong>\(p_t\)는 완전히 결정론적으로 진화한다</strong> — 같은 초기분포에서 출발하면 언제나 같은 \(p_t\)가 나온다.</p>
-          <p class="interp"><strong>무작위성이 사라지는 자리.</strong> 이것이 이 글 전체에서 가장 중요한 관점 전환이다. 경로의 언어에서는 매번 다른 답이 나오지만, 밀도의 언어로 옮기면 답이 하나다. 무수히 많은 경로에 대해 평균을 취하는 순간 우연이 씻겨 나가기 때문이며, <a href="#particledensity">앞의 "입자에서 밀도로"</a>가 무작위 버전으로 반복되는 것이다.</p>
-          <p class="interp"><strong>세 가지 힘.</strong> 밀도를 변화시키는 요인은 둘뿐이다. <strong>드리프트</strong>는 밀도를 통째로 실어 나르고(<a href="#continuity">연속방정식</a>의 항), <strong>확산</strong>은 뭉갠다(<a href="#heat">확산방정식</a>의 항). 다음 절의 Fokker–Planck 방정식은 이 두 항을 한 식에 적은 것에 지나지 않는다.</p>
+          <p class="interp"><strong>무작위성이 사라지는 자리.</strong> 이것이 이 글 전체에서 가장 중요한 관점 전환이다. 경로의 언어에서는 매번 다른 답이 나오지만, 밀도의 언어로 옮기면 답이 하나다. 무수히 많은 경로에 대해 평균을 취하는 순간 우연이 씻겨 나가기 때문이며, <a href="../2026-08-16-ode-and-pde/ko.html#particledensity">앞 글의 "입자에서 밀도로"</a>가 무작위 버전으로 반복되는 것이다.</p>
+          <p class="interp"><strong>두 가지 힘.</strong> 밀도를 변화시키는 요인은 둘뿐이다. <strong>드리프트</strong>는 밀도를 통째로 실어 나르고(<a href="../2026-08-16-ode-and-pde/ko.html#continuity">연속방정식</a>의 항), <strong>확산</strong>은 뭉갠다(<a href="../2026-08-16-ode-and-pde/ko.html#heat">확산방정식</a>의 항). 다음 절의 Fokker–Planck 방정식은 이 두 항을 한 식에 적은 것에 지나지 않는다.</p>
           <p class="interp"><strong>왜 이 시점이 필요한가.</strong> 생성 모델의 목표는 "데이터 분포에서 샘플을 뽑는 것"이지 "특정 경로를 재현하는 것"이 아니다. 그러니 우리가 실제로 통제하고 싶은 대상은 \(p_t\)다. 그리고 <strong>같은 \(p_t\)를 만들어내는 과정이 여럿일 수 있다</strong>는 사실 — 무작위한 것도, 결정론적인 것도 — 이 마지막 절의 핵심이 된다.</p>
           <p class="interp"><strong>머신러닝에서.</strong> 확산 모델의 학습 목표는 각 시각의 \(p_t\)에 대한 스코어를 맞히는 것이고, 이때 \(p_t\)가 닫힌 형태(가우시안 합성곱)로 주어지기에 학습이 가능하다. Flow Matching은 아예 원하는 \(p_t\) 경로를 먼저 설계하고 그것을 실현하는 속도장을 찾는 방식으로, 이 절의 관점을 가장 직접적으로 활용한다.</p>
           <p class="formula">\[\begin{aligned} p_t(x) &amp;= \text{시각 } t \text{ 에서 } X_t \text{ 의 밀도} \\ \text{경로: 무작위} &amp;\quad\longleftrightarrow\quad p_t: \text{결정론적} \\ \partial_t p_t &amp;= \underbrace{-\nabla\cdot(f p_t)}_{\text{수송}} + \underbrace{\tfrac{1}{2}\nabla^2(g^2 p_t)}_{\text{확산}} \end{aligned}\]</p>
@@ -394,7 +393,7 @@
       <div class="topic-body">
         <div class="topic-text">
           <p class="definition"><strong>정의.</strong> SDE \(dX=f(X,t)\,dt+g(t)\,dW\)의 주변밀도 \(p_t(x)\)는 다음 PDE를 만족한다: \[\frac{\partial p_t}{\partial t}=-\nabla\cdot\big(f(x,t)\,p_t\big)+\frac{1}{2}g^2(t)\,\nabla^2 p_t.\] 이를 Fokker–Planck 방정식(또는 Kolmogorov 전방정식)이라 한다.</p>
-          <p class="interp"><strong>두 항의 정체.</strong> 첫 항은 <a href="#continuity">연속방정식</a> 그 자체로, 드리프트가 밀도를 실어 나른다. 둘째 항은 <a href="#heat">확산방정식</a> 그 자체로, 노이즈가 밀도를 뭉갠다. <strong>Fokker–Planck는 이 글 Part IV의 두 방정식을 더한 것에 지나지 않는다</strong> — 새로운 것이 아니라 이미 아는 둘의 합이다.</p>
+          <p class="interp"><strong>두 항의 정체.</strong> 첫 항은 <a href="../2026-08-16-ode-and-pde/ko.html#continuity">연속방정식</a> 그 자체로, 드리프트가 밀도를 실어 나른다. 둘째 항은 <a href="../2026-08-16-ode-and-pde/ko.html#heat">확산방정식</a> 그 자체로, 노이즈가 밀도를 뭉갠다. <strong>Fokker–Planck는 앞 글의 두 방정식을 더한 것에 지나지 않는다</strong> — 새로운 것이 아니라 이미 아는 둘의 합이다.</p>
           <p class="interp"><strong>어떻게 유도되는가.</strong> 임의의 시험함수 \(\varphi\)에 대해 <a href="#itolemma">이토 보조정리</a>로 \(\frac{d}{dt}\mathbb{E}[\varphi(X_t)]\)를 계산하면 \(\mathbb{E}[f\varphi_x+\frac{1}{2}g^2\varphi_{xx}]\)가 나온다. 이것을 \(\int\varphi\,\partial_t p\,dx\)와 같다고 두고 부분적분으로 미분을 \(p\) 쪽으로 넘기면 위 식이 된다. <strong>이토 보조정리의 \(\frac{1}{2}g^2\varphi_{xx}\) 항이 그대로 확산 항이 된다</strong> — 이차변동이 여기까지 이어지는 것이다.</p>
           <p class="interp"><strong>정상분포.</strong> \(\partial_t p=0\)이 되는 분포가 존재할 수 있다. 드리프트가 퍼텐셜의 그래디언트 \(f=-\nabla U\)이고 \(g\)가 상수면 정상분포는 \(p_\infty\propto e^{-2U/g^2}\)다. <strong>랑주뱅 동역학</strong>이 임의의 분포에서 샘플을 뽑을 수 있는 근거가 이것이며, \(f=\frac{g^2}{2}\nabla\log p_{\text{target}}\)로 두면 정상분포가 정확히 목표 분포가 된다.</p>
           <p class="interp"><strong>머신러닝에서.</strong> 확산 모델의 순방향 SDE에 대응하는 Fokker–Planck 해가 닫힌 형태(가우시안)로 나오기 때문에, 임의의 시각 \(t\)에서 \(x_t\)를 한 번에 샘플링할 수 있고 스코어의 정답도 알 수 있다. 그리고 다음 절들에서 보듯, <strong>이 PDE를 만족시키는 과정이 SDE 하나만이 아니라는 사실</strong>이 Probability Flow ODE로 이어진다.</p>
@@ -450,7 +449,7 @@
       <p class="topic-lead">확산이 없는 결정론적 흐름에서는 Fokker–Planck가 연속방정식으로 줄어든다. 이 특수한 경우가 다음 절 반전의 발판이 된다.</p>
       <div class="topic-body">
         <div class="topic-text">
-          <p class="definition"><strong>대응.</strong> \(g=0\)이면 SDE는 ODE \(\dot{x}=v(x,t)\)가 되고, Fokker–Planck는 확산 항이 사라져 <a href="#continuity">연속방정식</a> \(\partial_t p+\nabla\cdot(pv)=0\)이 된다. <strong>ODE 하나에 연속방정식 하나가 정확히 대응한다.</strong></p>
+          <p class="definition"><strong>대응.</strong> \(g=0\)이면 SDE는 ODE \(\dot{x}=v(x,t)\)가 되고, Fokker–Planck는 확산 항이 사라져 <a href="../2026-08-16-ode-and-pde/ko.html#continuity">연속방정식</a> \(\partial_t p+\nabla\cdot(pv)=0\)이 된다. <strong>ODE 하나에 연속방정식 하나가 정확히 대응한다.</strong></p>
           <p class="interp"><strong>로그밀도를 따라가기.</strong> 입자를 따라다니며 그 자리의 밀도를 보면 \(\frac{d}{dt}\log p_t(x(t))=-\nabla\cdot v\)라는 단순한 식이 나온다. <a href="../2026-08-08-interactive-calculus/ko.html#divergence">발산이 부피 변화율</a>이었으므로, 부피가 늘어난 만큼 밀도가 묽어진다는 당연한 관계다. 그런데 이 식이 실용적으로 결정적인데 — <strong>야코비안 행렬식 대신 대각합만 계산하면 된다.</strong></p>
           <p class="interp"><strong>정확한 로그가능도.</strong> 그래서 결정론적 흐름으로 만든 생성 모델은 로그가능도를 정확히 계산할 수 있다. 초기분포에서의 로그밀도에 경로를 따라 \(-\nabla\cdot v\)를 적분해 더하면 끝이다. Continuous Normalizing Flow가 이 원리로 작동하며, 대각합조차 Hutchinson 추정기로 근사해 고차원에서도 쓸 수 있다.</p>
           <p class="interp"><strong>결정론인데 밀도는 변한다.</strong> 다시 강조할 만하다. 개별 입자에 아무 무작위성이 없어도, \(\nabla\cdot v\ne 0\)이면 밀도는 퍼지거나 모인다. <strong>"밀도가 퍼지는 것"과 "경로가 무작위인 것"은 별개의 사실이다.</strong> 이 분리가 다음 절의 반전을 가능하게 한다.</p>
@@ -477,7 +476,7 @@
       <div class="topic-body">
         <div class="topic-text">
           <p class="definition"><strong>정리.</strong> SDE \(dX=f\,dt+g\,dW\)의 주변밀도 \(p_t\)는, 다음 <em>결정론적</em> ODE의 밀도와 <strong>모든 시각에서 정확히 일치한다</strong>: \[\frac{dx}{dt}=f(x,t)-\frac{1}{2}g^2(t)\,\nabla_x\log p_t(x).\]</p>
-          <p class="interp"><strong>왜 성립하는가 — 한 줄 계산.</strong> Fokker–Planck의 확산 항을 발산 형태로 다시 쓰면 된다. \(\frac{1}{2}g^2\nabla^2p=\nabla\cdot\big(\frac{1}{2}g^2\nabla p\big)=\nabla\cdot\big(p\cdot\frac{1}{2}g^2\nabla\log p\big)\)이므로, \[\partial_t p=-\nabla\cdot\Big(p\big[f-\tfrac{1}{2}g^2\nabla\log p\big]\Big).\] 이것은 속도장 \(v=f-\frac{1}{2}g^2\nabla\log p\)에 대한 <a href="#continuity">연속방정식</a>이다. <strong>확산 항이 수송 항으로 흡수된 것</strong>이며, 그 대가로 속도장이 스코어에 의존하게 되었다.</p>
+          <p class="interp"><strong>왜 성립하는가 — 한 줄 계산.</strong> Fokker–Planck의 확산 항을 발산 형태로 다시 쓰면 된다. \(\frac{1}{2}g^2\nabla^2p=\nabla\cdot\big(\frac{1}{2}g^2\nabla p\big)=\nabla\cdot\big(p\cdot\frac{1}{2}g^2\nabla\log p\big)\)이므로, \[\partial_t p=-\nabla\cdot\Big(p\big[f-\tfrac{1}{2}g^2\nabla\log p\big]\Big).\] 이것은 속도장 \(v=f-\frac{1}{2}g^2\nabla\log p\)에 대한 <a href="../2026-08-16-ode-and-pde/ko.html#continuity">연속방정식</a>이다. <strong>확산 항이 수송 항으로 흡수된 것</strong>이며, 그 대가로 속도장이 스코어에 의존하게 되었다.</p>
           <p class="interp"><strong>무엇이 같고 무엇이 다른가.</strong> 각 시각의 <em>주변분포</em>는 완전히 같다. 그러나 <em>경로</em>는 전혀 다르다 — SDE 경로는 지그재그이고 ODE 경로는 매끄럽다. 오른쪽에서 두 앙상블을 나란히 돌리면 경로 모양은 딴판인데 히스토그램은 겹치는 것을 볼 수 있다. <strong>우리가 원하는 것이 분포뿐이라면 무작위성은 필수가 아니었던 것이다.</strong></p>
           <p class="interp"><strong>실용적 이득 세 가지.</strong> ① <strong>빠른 샘플링</strong> — ODE라서 RK4나 DPM-Solver 같은 고차 솔버를 쓸 수 있고, <a href="#eulermaruyama">약수렴 1차에 묶인 오일러–마루야마</a>와 달리 큰 스텝에서도 정확하다. 1000단계가 10~20단계가 된 배경이다. ② <strong>정확한 로그가능도</strong> — <a href="#odecontinuity">앞 절</a>의 \(-\nabla\cdot v\) 적분으로 계산된다. ③ <strong>가역성과 잠재공간</strong> — 결정론적이므로 이미지를 노이즈로 되돌렸다가 편집해 다시 생성할 수 있다. DDIM inversion과 이미지 편집이 여기서 나온다.</p>
           <p class="interp"><strong>대가.</strong> 무작위성이 없으므로 초기 노이즈 하나에 결과 하나가 대응한다. 샘플 다양성이 초기 분포에서만 오고, SDE 샘플러가 종종 갖는 "중간에 실수를 교정하는" 성질(랑주뱅 항의 자기 수정)을 잃는다. 그래서 실무에서는 품질과 속도 사이에서 둘을 섞어 쓰기도 한다.</p>
@@ -498,6 +497,8 @@
       </div>
     </section>
 
+
+      <p class="la-footnote">참고: Fu &amp; Wang, <em>A Tutorial on Diffusion Theory: From Differential Equations to Diffusion Models</em> (INSAIT), 그리고 Anderson (1982), Song et al., <em>Score-Based Generative Modeling through SDEs</em>. 앞 글 <a href="../2026-08-16-ode-and-pde/ko.html">Interactive Differential Equations</a>에서 이어지며, <a href="../2026-07-23-interactive-probability/ko.html">Interactive Probability</a>의 분포·기대값 개념을 함께 씁니다.</p>
         <a class="back-link" href="../../index.html">&larr; Back to all posts</a>
       </div>
     </div>

@@ -72,19 +72,15 @@
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
 
-  <header class="site-header">
-    <a class="brand" href="../../index.html">Blog <span>· Seungheon Doh</span></a>
-    <nav>
-      <a href="https://seungheondoh.github.io/" target="_blank" rel="noopener noreferrer">About</a>
-    </nav>
-  </header>
-
   <main id="main-content" class="la-page">
     <div class="la-hero" id="intro">
       <a class="language-link" href="./ko.html" lang="ko">Korean ver.</a>
       <h1>Interactive Linear Algebra</h1>
       <p class="la-meta">Date: <time datetime="2026-07-14">July 14, 2026</time><span class="la-meta-sep">|</span>Estimated Reading Time: 26 min<span class="la-meta-sep">|</span>Author: Seungheon Doh</p>
-      <p class="la-footnote">References: the linear algebra series at <a href="https://angeloyeo.github.io/" target="_blank" rel="noopener noreferrer">angeloyeo.github.io</a> and Goodfellow, Bengio &amp; Courville, <a href="https://www.deeplearningbook.org/contents/linear_algebra.html" target="_blank" rel="noopener noreferrer"><em>Deep Learning</em>, Chapter 2</a>.</p>
+      <details class="update-log">
+        <summary>Update log</summary>
+        <ul><li><time datetime="2026-07-14">July 14, 2026</time><span>Published.</span></li></ul>
+      </details>
       <p class="la-sub">A language model sees tokens as vectors. A vision model arranges pixels and features into tensors. A retrieval system compares a query with millions of documents by taking inner products. Different applications, same mathematical machinery.</p>
   <p class="la-sub">That machinery is <strong>linear algebra</strong>: the study of vector spaces, the transformations between them, and the matrices that represent those transformations. It is the language behind embeddings, attention, PCA, SVD, and the matrix multiplications inside every neural-network layer.</p>
   <p class="la-sub">But why is it called <em>linear</em>? Because a function \(f\) earns that name only by satisfying <em>both</em> of these conditions.</p>
@@ -595,6 +591,8 @@ print(torch.einsum('i,i->', a, b))       # dot product = 32.0</code></pre>
       </details>
     </section>
 
+
+      <p class="la-footnote">References: the linear algebra series at <a href="https://angeloyeo.github.io/" target="_blank" rel="noopener noreferrer">angeloyeo.github.io</a> and Goodfellow, Bengio &amp; Courville, <a href="https://www.deeplearningbook.org/contents/linear_algebra.html" target="_blank" rel="noopener noreferrer"><em>Deep Learning</em>, Chapter 2</a>.</p>
         <a class="back-link" href="../../index.html">&larr; Back to all posts</a>
       </div>
     </div>
@@ -602,7 +600,6 @@ print(torch.einsum('i,i->', a, b))       # dot product = 32.0</code></pre>
 
   <footer class="site-footer">
     <p>© <span id="current-year">2026</span> Seungheon Doh</p>
-    <a href="https://seungheondoh.github.io/" target="_blank" rel="noopener noreferrer">seungheondoh.github.io</a>
   </footer>
 
   <script src="../../js/common.js"></script>
