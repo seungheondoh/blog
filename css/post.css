@@ -180,7 +180,8 @@ main.la-page {
 }
 
 .interp { margin: 0 0 .8rem; }
-.interp em { font-style: normal; color: var(--muted); }
+/* 강조를 회색으로 흐리게 두면 오히려 덜 보인다. 한글에 기울임도 쓰지 않으므로 본문 색 그대로 둔다. */
+.interp em { font-style: normal; }
 
 .formula {
   margin: .9rem 0;

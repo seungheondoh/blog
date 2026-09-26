@@ -39,22 +39,31 @@ const escapeHtml = (s) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 // Locates the first element whose opening tag matches `openRe`, starting at
-// `from`. The target elements in content.html never nest inside themselves, so
-// a scan to the first matching close tag is exact — and asserted below.
+// `from`. Target elements may contain nested elements of the same tag — a
+// `<div class="topic-text">` holding a `<div class="lab">` demo, say — so the
+// close tag is found by counting depth rather than by scanning to the first one.
 function locate(html, openRe, tag, from = 0) {
   const re = new RegExp(openRe.source, openRe.flags.replace('g', '') + 'g');
   re.lastIndex = from;
   const open = re.exec(html);
   if (!open) return null;
   const innerStart = open.index + open[0].length;
-  const innerEnd = html.indexOf(`</${tag}>`, innerStart);
-  if (innerEnd === -1) throw new Error(`unclosed <${tag}> at ${open.index}`);
-  const inner = html.slice(innerStart, innerEnd);
-  if (new RegExp(`<${tag}[\\s>]`).test(inner)) {
-    throw new Error(`<${tag}> nests inside itself near offset ${open.index}; ` +
-      'the flat-scan assumption in build.mjs no longer holds');
+  const scan = new RegExp(`<${tag}(?=[\\s>/])|</${tag}>`, 'g');
+  scan.lastIndex = innerStart;
+  let depth = 1;
+  let innerEnd = -1;
+  for (let m = scan.exec(html); m; m = scan.exec(html)) {
+    depth += m[0][1] === '/' ? -1 : 1;
+    if (depth === 0) { innerEnd = m.index; break; }
   }
-  return { start: open.index, innerStart, inner, innerEnd, end: innerEnd + tag.length + 3 };
+  if (innerEnd === -1) throw new Error(`unclosed <${tag}> at ${open.index}`);
+  return {
+    start: open.index,
+    innerStart,
+    inner: html.slice(innerStart, innerEnd),
+    innerEnd,
+    end: innerEnd + tag.length + 3,
+  };
 }
 
 function setInner(html, openRe, tag, value, from = 0) {
@@ -150,7 +159,7 @@ function localizeSection(slice, id, copy) {
 }
 
 function localize(content, locale) {
-  const sections = [...content.matchAll(/<section id="([a-z]+)" class="topic">/g)]
+  const sections = [...content.matchAll(/<section id="([a-z-]+)" class="topic">/g)]
     .map((m) => ({ id: m[1], start: m.index }));
 
   // Structural drift between the markup and the overlay is a build error, not a
@@ -182,7 +191,7 @@ function localize(content, locale) {
   const nav = locate(html, /<nav class="la-index"[^>]*>/, 'nav');
   if (nav) {
     const relabelled = nav.inner.replace(
-      /(<a href="#([a-z]+)">)[^<]*(<\/a>)/g,
+      /(<a href="#([a-z-]+)">)[^<]*(<\/a>)/g,
       (m, open, id, close) => (topics[id] ? open + escapeHtml(topics[id].title) + close : m),
     );
     html = html.slice(0, nav.innerStart) + relabelled + html.slice(nav.innerEnd);
@@ -204,11 +213,13 @@ function localize(content, locale) {
 
 /* --------------------------------------------------------------- post meta */
 
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
-  'August', 'September', 'October', 'November', 'December'];
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 // Words per minute for Latin prose, characters per minute for CJK. Code blocks
-// are skipped: people scan them rather than read them at prose speed.
+// are skipped: people scan them rather than read them at prose speed. A locale may
+// override the result with `readingMinutes` when the author has timed the article
+// themselves — the estimate runs slow on posts that are mostly equations and tables.
 function readingMinutes(html) {
   const text = html.replace(/<pre[\s\S]*?<\/pre>/g, ' ').replace(/<[^>]+>/g, ' ');
   const cjk = (text.match(/[\u3131-\uD79D\u4E00-\u9FFF]/g) ?? []).length;
@@ -225,7 +236,7 @@ function applyMeta(html, locale) {
   const iso = el.inner.match(/datetime="([\d-]{10})"/)?.[1];
   if (!iso) return { html, author };
   const [y, m, d] = iso.split('-').map(Number);
-  const minutes = readingMinutes(html);
+  const minutes = locale.readingMinutes ?? readingMinutes(html);
   const line = [
     `Date: <time datetime="${iso}">${MONTHS[m - 1]} ${d}, ${y}</time>`,
     `Estimated Reading Time: ${minutes} min`,
@@ -377,8 +388,12 @@ async function buildPost(dir, stats) {
     // aids; they do not ship.
     const stripComments = (s) =>
       s.replace(/^[ \t]*<!--[\s\S]*?-->[ \t]*\r?\n/gm, '').replace(/<!--[\s\S]*?-->/g, '');
+    const stripEmptyLeads = (s) =>
+      s.replace(/^[ \t]*<p class="topic-lead">\s*<\/p>[ \t]*\r?\n/gm, '');
     const meta = applyMeta(
-      stripComments(applyHeading(locale.source ? content : localize(content, locale), locale.heading)),
+      stripEmptyLeads(stripComments(
+        applyHeading(locale.source ? content : localize(content, locale), locale.heading),
+      )),
       locale,
     );
     const body = applyUpdateLog(meta.html, locale, meta.iso);

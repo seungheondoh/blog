@@ -141,7 +141,7 @@ h1 {
 
 #post-list li {
   display: grid;
-  grid-template-columns: 6.2rem minmax(0, 1fr);
+  grid-template-columns: 5.4rem minmax(0, 1fr);
   gap: .8rem;
   /* The date is body size and the title is larger; without this the two cells
      align on their top edge and the date sits a couple of pixels high. */

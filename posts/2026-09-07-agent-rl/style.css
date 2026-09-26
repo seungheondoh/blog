@@ -1,0 +1,164 @@
+/* The page chrome and typography come from css/post.css, exactly as in the
+   representation-collapse article. This file only styles Agent/RL-specific
+   tables, listings and interactive figures. */
+.topic-body.single { grid-template-columns: minmax(0, 1fr); }
+.topic-text { min-width: 0; }
+.formula { overflow-x: auto; }
+.topic-lead:empty { display: none; }
+
+.draft-note {
+  margin: 1rem 0 .65rem;
+  color: var(--muted);
+  font-size: .76rem;
+  font-weight: 600;
+}
+
+.glossary-list,
+.refs {
+  margin-bottom: 1.2rem;
+  padding-left: 1.1rem;
+  font-size: .82rem;
+  line-height: 1.55;
+}
+.glossary-list li,
+.refs li { margin-bottom: .45rem; }
+.lab {
+  margin: 2rem 0;
+  padding: 1.3rem;
+  border: 1px solid #d8e0e6;
+  border-radius: 10px;
+  background: #f7f9fa;
+  box-shadow: 0 12px 32px rgb(32 56 77 / 6%);
+}
+.lab h3 { margin: 0 0 .8rem; color: #20384d; font-size: .94rem; }
+.lab .controls { display: flex; flex-wrap: wrap; gap: .7rem 1.2rem; margin-bottom: 1rem; }
+.lab label { display: flex; align-items: center; flex-wrap: wrap; gap: .45rem; font-size: .74rem; }
+.lab input[type=range] { width: 125px; accent-color: #316ba5; }
+.lab select, .lab button { font: inherit; font-size: .74rem; padding: .35rem .6rem; border: 1px solid #c9cdd1; border-radius: 4px; background: white; color: var(--ink); }
+.lab button { cursor: pointer; }
+.lab button:hover { background: #eaf0f6; }
+.lab button:focus-visible, .lab select:focus-visible, .lab input:focus-visible { outline: 2px solid #316ba5; outline-offset: 3px; }
+.lab .readout { min-height: 2.5em; margin: .75rem 0 0; font-size: .72rem; line-height: 1.7; }
+.lab .hint { margin-bottom: 0; font-size: .76rem; }
+/* viewBox는 640 단위인데 차트는 그림 상자 폭(데스크톱 약 920px)까지 늘어난다. 글자 크기도 같은 비율로
+   커지므로 7.5 단위로 두면 데스크톱에서 약 10.5px로 보인다. */
+.lab svg { width: 100%; height: auto; display: block; background: white; border-radius: 4px; }
+.lab svg text { font-family: inherit; font-size: 7.5px; fill: #555; }
+.steps { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: .5rem; }
+.step { padding: .65rem; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: .78rem; }
+.step.current { border-color: #316ba5; background: #eaf0f6; }
+.step small { display: block; color: var(--muted); margin-top: .3rem; }
+.trace { padding: .8rem; background: white; border-left: 2px solid #316ba5; font-size: .86rem; line-height: 1.8; min-height: 5em; }
+.tokens { display: flex; flex-wrap: wrap; gap: .4rem; }
+.tokens button[data-kind=action] { border-color: #759abc; background: #edf3f8; }
+.tokens button.selected { outline: 2px solid #316ba5; outline-offset: 1px; }
+.reward-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: .7rem; }
+.reward-grid label { display: block; }
+.reward-grid select { display: block; margin-top: .3rem; width: 100%; }
+/* position:relative가 필요한 이유: KaTeX가 접근성용으로 남기는 .katex-mathml은
+   position:absolute이고 시각적으로는 1px로 클립되지만, 위치 기준이 될 조상이
+   없으면 초기 컨테이닝 블록을 기준으로 잡는다. 그러면 가로로 스크롤되는 표
+   안쪽 깊은 위치의 수식이 문서 전체의 scrollWidth를 늘려, 모바일에서 페이지가
+   가로로 밀린다. 스크롤 컨테이너를 위치 기준으로 만들어 넘침을 그 안에 가둔다. */
+.table-scroll { overflow-x: auto; margin: 1.4rem 0 1.6rem; position: relative; border-radius: 6px; }
+.formula, .lab, pre { position: relative; }
+.cmp { width: 100%; font-size: .84rem; border-collapse: collapse; table-layout: fixed; border: 1px solid #dfe3e6; }
+.cmp th, .cmp td { padding: .82rem .9rem; vertical-align: top; text-align: left; border: 1px solid #e1e4e7; line-height: 1.72; overflow-wrap: anywhere; }
+.cmp th { background: #f0f3f5; color: #344452; font-weight: 650; }
+.cmp tbody tr:nth-child(even) { background: #fafbfb; }
+.cmp tbody tr:hover { background: #f4f7f9; }
+.cmp td:first-child { font-weight: 500; }
+.cmp .numeric { text-align: right; font-variant-numeric: tabular-nums; }
+.source-quote { margin: 1rem 0; padding: .7rem 1rem; border-left: 3px solid #bdc9d5; background: #f7f8f9; }
+.source-quote p { margin: .25rem 0; font-size: .86rem; line-height: 1.75; }
+.source-quote cite { font-size: .78rem; font-style: normal; }
+.source-summary { border-left: 2px solid #c8d2dc; padding-left: 1rem; line-height: 1.85; color: #37434f; }
+.source-attribution { font-size: .85em; }
+.quote-lead { margin: 1.1rem 0 -.5rem; font-size: .85rem; line-height: 1.8; color: #4a545e; }
+.lab .case-goal { margin-top: 0; font-size: .8rem; line-height: 1.75; }
+.execution-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .8rem; margin-top: .9rem; }
+.execution-panel { min-width: 0; border: 1px solid #dedfe2; background: white; border-radius: 4px; overflow: hidden; }
+.execution-panel h4, .decision-panel h4 { margin: 0; padding: .65rem .8rem; font-size: .78rem; border-bottom: 1px solid #dedfe2; background: #f2f4f6; }
+.execution-panel pre { margin: 0; padding: .8rem; font-size: .72rem; background: white; }
+.execution-panel h4 .panel-tag { float: right; color: #316ba5; font-variant-numeric: tabular-nums; }
+.act-kind { display: inline-block; margin: 0 .8rem; padding: .12rem .5rem; border-radius: 3px; font-size: .72rem; }
+.act-text { background: #eaf1e9; color: #2f6b4f; }
+.act-tool { background: #eaf0f6; color: #2a5d8f; }
+.act-end { background: #f0f0f1; color: #6b7280; }
+.test-version, .test-pending { padding: .6rem .8rem; margin: 0; font-size: .74rem; }
+.test-row { padding: .55rem .8rem; border-top: 1px solid #e6e7e9; font-size: .74rem; }
+.test-row strong, .test-row span, .test-row code { display: block; overflow-wrap: anywhere; white-space: normal; }
+.test-pass strong { color: #286248; }
+.test-fail strong { color: #9b432c; }
+.decision-panel { margin-top: .8rem; border: 1px solid #c8d6e3; border-radius: 4px; background: white; }
+.decision-panel > code { display: block; padding: .8rem .8rem 0; font-size: .75rem; overflow-wrap: anywhere; white-space: normal; }
+.decision-panel > p { font-size: .81rem; padding: 0 .8rem; line-height: 1.7; }
+.worked-example { padding: 1.1rem; margin: 1.4rem 0; border: 1px solid #dfe3e6; border-radius: 7px; background: #fafbfb; }
+.worked-example h3 { margin-top: 0; }
+.citation { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.formula {
+  overflow-x: auto;
+  margin-block: 1.2rem;
+  padding: .78rem 1rem;
+  border: 1px solid #e2e6e9;
+  background: #f7f8f9;
+}
+.refs li { margin: .6rem 0; font-size: .83rem; }
+details.derivation { border: 1px solid #dce1e5; border-radius: 8px; padding: .9rem 1.05rem; margin: 1.35rem 0; background: #fbfcfc; }
+details.derivation[open] { padding-bottom: 1.1rem; }
+details.derivation summary { cursor: pointer; color: #344452; font-size: .9rem; font-weight: 600; }
+pre { overflow-x: auto; font-size: .8rem; line-height: 1.65; padding: 1rem; background: var(--code-bg,#f5f5f5); }
+
+/* --- shared widgets for the scenario simulations (그림 2–6) --- */
+.trace-list { display: grid; gap: .3rem; }
+.trace-list .seg { display: grid; grid-template-columns: minmax(0,9.5rem) minmax(0,1fr) minmax(0,8rem);
+  gap: .2rem .8rem; width: 100%; padding: .5rem .65rem; text-align: left; cursor: pointer;
+  border: 1px solid #dcdfe2; border-left-width: 3px; border-radius: 4px; background: white; font: inherit; font-size: .7rem; }
+.trace-list .seg-act { border-left-color: #316ba5; }
+.trace-list .seg-obs { border-left-color: #c3c8cd; background: #f7f8f9; }
+.trace-list .seg.selected { outline: 2px solid #316ba5; outline-offset: 1px; }
+.trace-list .seg:hover { background: #eef3f8; }
+.trace-list .seg code { min-width: 0; overflow-wrap: anywhere; color: var(--ink); }
+.trace-list .seg-role { color: #55606b; font-weight: 500; }
+.trace-list .seg-tok { color: var(--muted); font-variant-numeric: tabular-nums; }
+.mini-panel { margin-top: .8rem; border: 1px solid #dedfe2; border-radius: 4px; background: white; overflow: hidden; }
+.mini-row { display: grid; grid-template-columns: minmax(0,11rem) minmax(0,1fr) minmax(0,9rem);
+  gap: .2rem .8rem; padding: .45rem .7rem; border-bottom: 1px solid #eceef0; font-size: .7rem; }
+.mini-row code { min-width: 0; overflow-wrap: anywhere; }
+.mini-row span:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+.mini-row.ok { background: #f4f8f5; }
+.mini-row.no { background: #fbf5f2; }
+.mini-foot { padding: .45rem .7rem; color: var(--muted); font-size: .68rem; }
+.dx-item { padding: .7rem .8rem; border-left: 3px solid #316ba5; background: white; margin-bottom: .5rem; }
+.dx-item h5 { margin: 0 0 .3rem; font-size: .82rem; }
+.dx-item p { margin: 0; font-size: .78rem; line-height: 1.7; }
+.dx-foot { margin: .6rem 0 0; color: var(--muted); font-size: .75rem; line-height: 1.7; }
+.checklist { margin: 1rem 0; padding-left: 1.1rem; }
+.checklist li { margin: .5rem 0; font-size: .86rem; line-height: 1.8; }
+.topic-text h4 { margin: 1.3rem 0 .5rem; font-size: .92rem; font-weight: 600; }
+.lab .mini-panel + .readout { margin-top: .75rem; }
+@media(max-width:600px) {
+  .execution-grid { grid-template-columns: minmax(0,1fr); }
+  .cmp { min-width: 560px; }
+  .steps { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .reward-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .trace-list .seg, .mini-row { grid-template-columns: minmax(0,1fr); }
+  .mini-row span:last-child { text-align: left; }
+  .lab { padding: .9rem; border-radius: 8px; }
+}
+
+/* Paper-style Python listings, shared visual language with representation-collapse. */
+.listing { margin: 1.6rem 0; min-width: 0; border-top: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); background: #fff; }
+.listing figcaption { padding: .6rem .2rem; border-bottom: 1px solid var(--line); font-size: .85rem; line-height: 1.5; }
+.listing figcaption b { font-weight: 650; margin-right: .3rem; }
+.listing .listing-meta { margin: 0; padding: .65rem .2rem 0; font-size: .75rem; line-height: 1.7; color: var(--muted); }
+.listing pre { margin: 0; padding: .8rem .2rem 1rem; border: 0; border-radius: 0; background: #fff; overflow-x: auto; }
+.listing code { font: 12px/1.8 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre; }
+.listing .c { color: #727985; }
+.listing .k { font-weight: 650; color: #25374c; }
+.listing .s { color: #526a52; }
+.math-walkthrough { position: relative; overflow-x: auto; margin: 1.2rem 0; padding: .35rem 0; }
+.math-walkthrough .katex-display { margin: .5rem 0; }
+@media (max-width: 600px) { .listing code { font-size: 11px; } }
+
+.step-cmp th:first-child { width: 4.2rem; }
